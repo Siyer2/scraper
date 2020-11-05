@@ -1,0 +1,7 @@
+org: si2222
+app: scraper
+component: express
+name: express-starter
+
+inputs:
+  src: ./
