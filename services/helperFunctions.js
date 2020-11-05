@@ -30,7 +30,15 @@ module.exports = {
         const minimumUOC = currentYearData.credit_points;
         const programCode = currentYearData.course_code || currentYearData.code;
 
-        const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode };
+        const programInfo = { 
+            year, 
+            faculty, 
+            title, 
+            studyLevel, 
+            minimumUOC, 
+            programCode, 
+            ...currentYearData.subclass.value && { specialisation_type: currentYearData.subclass.value }
+        };
         return programInfo;
     }
 }

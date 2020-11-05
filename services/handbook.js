@@ -660,15 +660,20 @@ async function getSpecialisation(db, specialisation, programInfo) {
 }
 
 module.exports = {
-    parseProgram: function (db, programInfo, curriculumStructure) {
+    parseProgram: function (db, programInfo, curriculumStructure, specialisation) {
         return new Promise(async (resolve, reject) => {
             try {
-                console.log(`Parsing ${programInfo.title}, ${programInfo.year}...`);
-                pushProgramToDB(programInfo, db);
+                console.log(`Parsing ${specialisation && 'spec '}${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
+                if (specialisation) {
+                    pushSpecialisationToDB(db, specialisation);
+                }
+                else {
+                    pushProgramToDB(programInfo, db);
+                }
 
-                await parseCurriculumStructure(db, curriculumStructure.container, programInfo);
+                await parseCurriculumStructure(db, curriculumStructure.container, programInfo, specialisation);
 
-                console.log(`Parsed ${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
+                console.log(`Parsed ${specialisation && 'spec '}${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
                 resolve();
             } catch (ex) {
                 console.log("EXCEPTION PARSING PROGRAM", ex);
@@ -676,15 +681,17 @@ module.exports = {
             }
         });
     }, 
-    parseSpecialisation: function (db, specialisation, programInfo) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await getSpecialisation(db, specialisation, programInfo);
-                resolve();
-            } catch (exception) {
-                console.log(`EXCEPTION GETTING SPECIALISATION FOR ${specialisation.specialisation_code} IN ${specialisation.implementation_year}`, exception);
-                reject(exception);
-            }
-        });
-    }
+    // parseSpecialisation: function (db, specialisation, programInfo) {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
+    //             console.log(`Parsing spec ${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
+    //             await getSpecialisation(db, specialisation, programInfo);
+    //             console.log(`Parsed spec ${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}`);
+    //             resolve();
+    //         } catch (exception) {
+    //             console.log(`EXCEPTION GETTING SPECIALISATION FOR ${specialisation.specialisation_code} IN ${specialisation.implementation_year}`, exception);
+    //             reject(exception);
+    //         }
+    //     });
+    // }
 }
