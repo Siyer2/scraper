@@ -462,22 +462,24 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                         }
                         // Get Majors/Minors
                         else if (['DS', 'Undergraduate Major', 'Undergraduate Minor', 'Any Specialisation'].includes(rule.vertical_grouping.label)) {
-                            const getData = async () => {
-                                return Promise.all(rule.relationship.map(specialisation => getSpecAsync(db, {
-                                    specialisation_code: specialisation.academic_item_code,
-                                    specialisation_description: specialisation.description,
-                                    specialisation_type: specialisation.academic_item_type.value,
-                                    implementation_year: specialisation.implementation_year
-                                }, programInfo)));
-                            }
+                            // const getData = async () => {
+                            //     return Promise.all(rule.relationship.map(specialisation => getSpecAsync(db, {
+                            //         specialisation_code: specialisation.academic_item_code,
+                            //         specialisation_description: specialisation.description,
+                            //         specialisation_type: specialisation.academic_item_type.value,
+                            //         implementation_year: specialisation.implementation_year
+                            //     }, programInfo)));
+                            // }
 
                             rule.relationship.map((specialisation) => {
                                 rulesToPush[specialisation.academic_item_type.value].push(specialisation.academic_item_code);
                             });
 
-                            getData().then(data => {
-                                resolve(data); // Do I have to wait for this?
-                            });
+                            resolve();
+
+                            // getData().then(data => {
+                            //     resolve(data); // Do I have to wait for this?
+                            // });
                         }
                         // General Education
                         else if (rule.vertical_grouping.label === 'General Education') {
