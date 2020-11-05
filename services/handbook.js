@@ -267,63 +267,47 @@ function getCoursesFromDynamicQuery(db, dynamicQuery, programInfo) {
 
 // To do: Change this to call the oldest server
 // If request fails, try again with another server
+var endpoints = [
+    { name: "getcoursesfromrule", endpoint: "https://fu1xsxq2sc.execute-api.us-east-1.amazonaws.com", lastRun: "" },
+    { name: "getcoursesfromrule2", endpoint: "https://ngy7jy6rb6.execute-api.us-east-1.amazonaws.com", lastRun: "" },
+]
+
+function getEndpoint() {
+    // Find the endpoint that hasn't been used recently
+    const endpointsSortedByUse = _.sortBy(endpoints, function(endpoint) {
+        return '' || endpoint.lastRun
+    });
+
+    // Update the time it was used
+    endpointsSortedByUse[0].lastRun = Date.now();
+
+    return endpointsSortedByUse[0].endpoint;
+}
+
 function getCoursesFromRule(db, rule, programInfo) {
     return new Promise(async (resolve, reject) => {
         try {
-            var courses = [];
-            if (rule.relationship.length) {
-                var coursesFromRelationship = [];
-                const coursesPromises = rule.relationship.map((course) => {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            if (course.academic_item_code) {
-                                coursesFromRelationship.push({ code: course.academic_item_code, credit_points: course.credit_points || course.creditPoints || course.academic_item_credit_points });
-                            }
-                            else if (course.rule || course.dynamic_query) {
-                                const coursesFromDynamicQuery = await getCoursesFromDynamicQuery(db, course, programInfo);
-                                coursesFromRelationship.push(coursesFromDynamicQuery);
-                            }
+            console.log("Getting course from rule...");
+            var config = {
+                method: 'post',
+                url: `${getEndpoint()}/getCourses`,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                data: { rule, programInfo }
+            };
 
-                            resolve();
-                        } catch (ex) {
-                            console.log("EXCEPTION GETTING COURSE PROMISES", ex)
-                            reject(ex);
-                        }
-                    });
+            axios(config)
+                .then(function (response) {
+                    console.log(JSON.stringify(response.data));
+                    resolve(response.data);
+                })
+                .catch(function (error) {
+                    console.log("AXIOS ERROR GETTING COURSE FROM RULE", error);
+                    reject(error);
                 });
-                await Promise.all(coursesPromises);
 
-                courses.push(_.flatten(coursesFromRelationship));
-            }
-
-            if (rule.dynamic_relationship.length) {
-                // EXPERIMENTAL
-                var coursesFromDynamicRelationship = [];
-                const coursesPromises = rule.dynamic_relationship.map((course) => {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            const dynamicCourses = await getCoursesFromDynamicQuery(db, course, programInfo);
-                            // coursesFromDynamicRelationship.push(dynamicCourses);
-                            coursesFromDynamicRelationship = coursesFromDynamicRelationship.concat(dynamicCourses);
-                            resolve();
-                        } catch (ex) {
-                            console.log("EXCEPTION GETTING DYNAMIC COURSE PROMISES");
-                            reject(ex);
-                        }
-                    });
-                });
-                await Promise.all(coursesPromises);
-
-                courses.push(coursesFromDynamicRelationship);
-            }
-
-            resolve({
-                ...rule.credit_points && { credit_points: rule.credit_points },
-                ...rule.credit_points_max && { credit_points_max: rule.credit_points_max },
-                description: rule.description ? rule.description : rule.title,
-                ...courses.length && { courses: _.flatten(courses) }
-            });
-
+            console.log("Got course from rule");
         } catch (ex) {
             console.log("EXCEPTION GETTING COURSES FROM RULE", ex);
             reject(ex);

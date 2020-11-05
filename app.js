@@ -50,7 +50,7 @@ app.get('/me', async (request, response) => {
 app.get('/specialisation', async function (request, response) {
   try {
     const specialisation = {
-      specialisation_code: 'ACHMA1',
+      specialisation_code: 'ECONA1',
       specialisation_type: 'major'
     }
     console.log("Parsing ", specialisation);
