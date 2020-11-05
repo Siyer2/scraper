@@ -663,7 +663,7 @@ module.exports = {
     parseProgram: function (db, programInfo, curriculumStructure, specialisation) {
         return new Promise(async (resolve, reject) => {
             try {
-                console.log(`Parsing ${specialisation && 'spec '}${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
+                console.log(`Parsing ${specialisation ? 'spec ' : ''}${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
                 if (specialisation) {
                     pushSpecialisationToDB(db, specialisation);
                 }
@@ -673,7 +673,7 @@ module.exports = {
 
                 await parseCurriculumStructure(db, curriculumStructure.container, programInfo, specialisation);
 
-                console.log(`Parsed ${specialisation && 'spec '}${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
+                console.log(`Parsed ${specialisation ? 'spec ' : ''}${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
                 resolve();
             } catch (ex) {
                 console.log("EXCEPTION PARSING PROGRAM", ex);

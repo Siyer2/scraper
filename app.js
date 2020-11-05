@@ -210,7 +210,7 @@ app.get('/program', async function (request, response) {
     const studyLevel = 'ugrd';
     const minimumUOC = '192';
     const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode: pCode };
-    await parseProgram(request.db, programInfo, file, year);
+    await parseProgram(request.db, programInfo, file);
 
     return response.send("done");
 
