@@ -21,5 +21,16 @@ module.exports = {
                 reject(ex);
             }
         });
+    }, 
+    getProgramInfo: function (currentYearData) {
+        const year = currentYearData.implementation_year;
+        const faculty = currentYearData.parent_academic_org.cl_id || currentYearData.owning_org.cl_id;
+        const title = currentYearData.title;
+        const studyLevel = currentYearData.study_level_single.value;
+        const minimumUOC = currentYearData.credit_points;
+        const programCode = currentYearData.course_code || currentYearData.code;
+
+        const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode };
+        return programInfo;
     }
 }

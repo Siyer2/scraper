@@ -8,6 +8,7 @@ const app = express();
 
 //==== Functions ====//
 const { parseProgram, parseSpecialisation } = require('./services/handbook');
+const { getProgramInfo } = require('./services/helperFunctions');
 
 // Error handler
 // app.use((err, req, res) => {
@@ -207,13 +208,14 @@ app.get('/program', async function (request, response) {
         let programPromises = res.data.contentlets.map((currentYear) => {
           return new Promise(async (resolve, reject) => {
             try {
-              const year = JSON.parse(currentYear.data).implementation_year;
-              const faculty = JSON.parse(currentYear.data).parent_academic_org.cl_id || JSON.parse(currentYear.data).owning_org.cl_id;
-              const title = JSON.parse(currentYear.data).title;
-              const studyLevel = JSON.parse(currentYear.data).study_level_single.value;
-              const minimumUOC = JSON.parse(currentYear.data).credit_points;
-              const programCode = JSON.parse(currentYear.data).course_code;
-              const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode };
+              const programInfo = getProgramInfo(JSON.parse(currentYear.data));
+              // const year = JSON.parse(currentYear.data).implementation_year;
+              // const faculty = JSON.parse(currentYear.data).parent_academic_org.cl_id || JSON.parse(currentYear.data).owning_org.cl_id;
+              // const title = JSON.parse(currentYear.data).title;
+              // const studyLevel = JSON.parse(currentYear.data).study_level_single.value;
+              // const minimumUOC = JSON.parse(currentYear.data).credit_points;
+              // const programCode = JSON.parse(currentYear.data).course_code;
+              // const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode };
 
               await parseProgram(request.db, programInfo, JSON.parse(currentYear.CurriculumStructure));
 
