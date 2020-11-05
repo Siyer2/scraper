@@ -7,7 +7,7 @@ const axios = require('axios');
 const app = express();
 
 //==== Functions ====//
-const { parseProgram, getSpecialisation } = require('./services/handbook');
+const { parseProgram, parseSpecialisation } = require('./services/handbook');
 
 // Error handler
 // app.use((err, req, res) => {
@@ -64,7 +64,7 @@ app.get('/specialisation', async function (request, response) {
       programCode: '3502'
     }
 
-    await getSpecialisation(request.db, specialisation, programInfo);
+    await parseSpecialisation(request.db, specialisation, programInfo);
 
     return response.send(`Parsed ${JSON.stringify(specialisation)}`);
   } catch (error) {
