@@ -1,0 +1,451 @@
+{
+    "curriculum_structure": {
+        "value": "2021.01.004",
+        "cl_id": "2eec57bbdb33dc50eb6b147a3a961976",
+        "key": "version_code"
+    },
+    "relationship_type": {
+        "label": "Working",
+        "value": "working"
+    },
+    "ai_to_cs_cl_id": "66ec57bbdb33dc50eb6b147a3a96197e",
+    "cl_id": {
+        "value": "3061",
+        "cl_id": "805e6ebbdbb95c50eb6b147a3a961998",
+        "key": "code"
+    },
+    "name": "Academic Structure",
+    "credit_points": "192",
+    "parent_id": {
+        "value": "Curriculum Structure Master Record: Created 11-Jul-2020 09:18:18 PM",
+        "cl_id": "d05e6ebbdbb95c50eb6b147a3a9619b8",
+        "key": "",
+        "type": "x_f5sl_cl_cs_master"
+    },
+    "effective_date": "2018-03-05",
+    "structure_cl_id": "2eec57bbdb33dc50eb6b147a3a961976",
+    "source": {
+        "value": "8cc40f7fdbbf9c50eb6b147a3a96192f",
+        "cl_id": "8cc40f7fdbbf9c50eb6b147a3a96192f",
+        "key": ""
+    },
+    "parent_table": "x_f5sl_cl_cs_master",
+    "container": [
+        {
+            "related_academic_item": {
+                "value": "",
+                "cl_id": null,
+                "key": "code"
+            },
+            "horizontal_grouping": {
+                "label": null,
+                "value": null
+            },
+            "preface": "",
+            "dynamic_query": "",
+            "child_table": "",
+            "vertical_grouping": {
+                "label": "Information Rule",
+                "value": "IR"
+            },
+            "child_record": {
+                "value": "",
+                "cl_id": null,
+                "key": "",
+                "type": null
+            },
+            "footnote": "",
+            "credit_points_max": "",
+            "cl_id": "26ec57bbdb33dc50eb6b147a3a961979",
+            "set_based": "false",
+            "map_type": "",
+            "title": "Discipline Elective List",
+            "credit_points": "",
+            "parent_record": {
+                "value": "Curriculum Structure: 2021.01.004",
+                "cl_id": "2eec57bbdb33dc50eb6b147a3a961976",
+                "key": "version_code",
+                "type": "x_f5sl_cl_curriculum_structure"
+            },
+            "parent_table": "x_f5sl_cl_curriculum_structure",
+            "parent_connector": {
+                "label": "AND",
+                "value": "AND"
+            },
+            "exclude": "false",
+            "related_ai": [],
+            "container": [],
+            "order": "5",
+            "description": "Students must take 12 UOC from the Discipline Elective List of any food science specialisation. Students should check the details on the relevant handbook specialisation pages.",
+            "relationship": [],
+            "dynamic_relationship": []
+        },
+        {
+            "related_academic_item": {
+                "value": "",
+                "cl_id": null,
+                "key": "code"
+            },
+            "horizontal_grouping": {
+                "label": null,
+                "value": null
+            },
+            "preface": "",
+            "dynamic_query": "",
+            "child_table": "",
+            "vertical_grouping": {
+                "label": null,
+                "value": null
+            },
+            "child_record": {
+                "value": "",
+                "cl_id": null,
+                "key": "",
+                "type": null
+            },
+            "footnote": "",
+            "credit_points_max": "",
+            "cl_id": "2aec57bbdb33dc50eb6b147a3a961979",
+            "set_based": "false",
+            "map_type": "",
+            "title": "Disciplinary Component",
+            "credit_points": "168",
+            "parent_record": {
+                "value": "Curriculum Structure: 2021.01.004",
+                "cl_id": "2eec57bbdb33dc50eb6b147a3a961976",
+                "key": "version_code",
+                "type": "x_f5sl_cl_curriculum_structure"
+            },
+            "parent_table": "x_f5sl_cl_curriculum_structure",
+            "parent_connector": {
+                "label": "AND",
+                "value": "AND"
+            },
+            "exclude": "false",
+            "related_ai": [],
+            "container": [
+                {
+                    "related_academic_item": {
+                        "value": "",
+                        "cl_id": null,
+                        "key": "code"
+                    },
+                    "horizontal_grouping": {
+                        "label": null,
+                        "value": null
+                    },
+                    "preface": "",
+                    "dynamic_query": "",
+                    "child_table": "",
+                    "vertical_grouping": {
+                        "label": "Honours Specialisation",
+                        "value": "honours"
+                    },
+                    "child_record": {
+                        "value": "",
+                        "cl_id": null,
+                        "key": "",
+                        "type": null
+                    },
+                    "footnote": "",
+                    "credit_points_max": "",
+                    "cl_id": "e2ec57bbdb33dc50eb6b147a3a961979",
+                    "set_based": "false",
+                    "map_type": "Stream",
+                    "title": "Majors",
+                    "credit_points": "",
+                    "parent_record": {
+                        "value": "Curriculum Structure Container: Disciplinary Component",
+                        "cl_id": "2aec57bbdb33dc50eb6b147a3a961979",
+                        "key": "title",
+                        "type": "x_f5sl_cl_cs_container"
+                    },
+                    "parent_table": "x_f5sl_cl_cs_container",
+                    "parent_connector": {
+                        "label": "AND",
+                        "value": "AND"
+                    },
+                    "exclude": "false",
+                    "related_ai": [],
+                    "container": [],
+                    "order": "3",
+                    "description": "Students must complete at least one of the specialisations below.",
+                    "relationship": [
+                        {
+                            "cl_id": "22ec57bbdb33dc50eb6b147a3a961979",
+                            "exclude": "false",
+                            "vertical_grouping": {
+                                "label": "Honours Specialisation",
+                                "value": "honours"
+                            },
+                            "parent_connector": {
+                                "label": "AND",
+                                "value": "AND"
+                            },
+                            "parent_record": {
+                                "value": "Curriculum Structure Container: Majors",
+                                "cl_id": "e2ec57bbdb33dc50eb6b147a3a961979",
+                                "key": "title",
+                                "type": "x_f5sl_cl_cs_container"
+                            },
+                            "owning_structure": {
+                                "value": "2021.01.004",
+                                "cl_id": "2eec57bbdb33dc50eb6b147a3a961976",
+                                "key": "version_code"
+                            },
+                            "child_record": {
+                                "value": "Specialisation: FOODKH",
+                                "cl_id": "b593c37f1bf39010d5fb0fabdc4bcb11",
+                                "key": "code",
+                                "type": "x_f5sl_cl_areas_of_study"
+                            },
+                            "credit_points": "",
+                            "child_table": "x_f5sl_cl_areas_of_study",
+                            "description": "",
+                            "parent_table": "x_f5sl_cl_cs_container",
+                            "academic_item_active": "true",
+                            "abbr_name": "",
+                            "academic_item_version_name": "2021.02",
+                            "academic_item_credit_points": "168",
+                            "abbreviated_name_and_major": null,
+                            "academic_item_name": "Food Science and Nutrition",
+                            "academic_item_type": {
+                                "label": "Honours",
+                                "value": "honours"
+                            },
+                            "academic_item_pill_text": "Specialisation",
+                            "academic_item_url": "/undergraduate/specialisations/2021/FOODKH",
+                            "academic_item_state": "show",
+                            "academic_item_code": "FOODKH",
+                            "order": "2",
+                            "links": []
+                        },
+                        {
+                            "cl_id": "a2ec57bbdb33dc50eb6b147a3a961979",
+                            "exclude": "false",
+                            "vertical_grouping": {
+                                "label": "Honours Specialisation",
+                                "value": "honours"
+                            },
+                            "parent_connector": {
+                                "label": "AND",
+                                "value": "AND"
+                            },
+                            "parent_record": {
+                                "value": "Curriculum Structure Container: Majors",
+                                "cl_id": "e2ec57bbdb33dc50eb6b147a3a961979",
+                                "key": "title",
+                                "type": "x_f5sl_cl_cs_container"
+                            },
+                            "owning_structure": {
+                                "value": "2021.01.004",
+                                "cl_id": "2eec57bbdb33dc50eb6b147a3a961976",
+                                "key": "version_code"
+                            },
+                            "child_record": {
+                                "value": "Specialisation: FOODJH",
+                                "cl_id": "aebb97b71b779010d5fb0fabdc4bcbf8",
+                                "key": "code",
+                                "type": "x_f5sl_cl_areas_of_study"
+                            },
+                            "credit_points": "",
+                            "child_table": "x_f5sl_cl_areas_of_study",
+                            "description": "",
+                            "parent_table": "x_f5sl_cl_cs_container",
+                            "academic_item_active": "true",
+                            "abbr_name": "",
+                            "academic_item_version_name": "2021.02",
+                            "academic_item_credit_points": "168",
+                            "abbreviated_name_and_major": null,
+                            "academic_item_name": "Food Science and Technology",
+                            "academic_item_type": {
+                                "label": "Honours",
+                                "value": "honours"
+                            },
+                            "academic_item_pill_text": "Specialisation",
+                            "academic_item_url": "/undergraduate/specialisations/2021/FOODJH",
+                            "academic_item_state": "show",
+                            "academic_item_code": "FOODJH",
+                            "order": "1",
+                            "links": []
+                        }
+                    ],
+                    "dynamic_relationship": []
+                },
+                {
+                    "related_academic_item": {
+                        "value": "",
+                        "cl_id": null,
+                        "key": "code"
+                    },
+                    "horizontal_grouping": {
+                        "label": null,
+                        "value": null
+                    },
+                    "preface": "",
+                    "dynamic_query": "",
+                    "child_table": "",
+                    "vertical_grouping": {
+                        "label": "Undergraduate Minor",
+                        "value": "undergrad_minor"
+                    },
+                    "child_record": {
+                        "value": "",
+                        "cl_id": null,
+                        "key": "",
+                        "type": null
+                    },
+                    "footnote": "",
+                    "credit_points_max": "",
+                    "cl_id": "e6ec57bbdb33dc50eb6b147a3a961979",
+                    "set_based": "false",
+                    "map_type": "Stream",
+                    "title": "Minors",
+                    "credit_points": "",
+                    "parent_record": {
+                        "value": "Curriculum Structure Container: Disciplinary Component",
+                        "cl_id": "2aec57bbdb33dc50eb6b147a3a961979",
+                        "key": "title",
+                        "type": "x_f5sl_cl_cs_container"
+                    },
+                    "parent_table": "x_f5sl_cl_cs_container",
+                    "parent_connector": {
+                        "label": "AND",
+                        "value": "AND"
+                    },
+                    "exclude": "false",
+                    "related_ai": [],
+                    "container": [],
+                    "order": "4",
+                    "description": "Students may optionally declare the following 24 UOC minor. <br />A maximum of 12 UOC may be core courses that are shared with a student's major.  At least 12 UOC in the minor must consist of courses at level 3 or higher.<br /><br />Students in dual degrees may not have space within their program requirements to complete the minor.",
+                    "relationship": [
+                        {
+                            "cl_id": "66ec57bbdb33dc50eb6b147a3a961979",
+                            "exclude": "false",
+                            "vertical_grouping": {
+                                "label": "Undergraduate Minor",
+                                "value": "undergrad_minor"
+                            },
+                            "parent_connector": {
+                                "label": "AND",
+                                "value": "AND"
+                            },
+                            "parent_record": {
+                                "value": "Curriculum Structure Container: Minors",
+                                "cl_id": "e6ec57bbdb33dc50eb6b147a3a961979",
+                                "key": "title",
+                                "type": "x_f5sl_cl_cs_container"
+                            },
+                            "owning_structure": {
+                                "value": "2021.01.004",
+                                "cl_id": "2eec57bbdb33dc50eb6b147a3a961976",
+                                "key": "version_code"
+                            },
+                            "child_record": {
+                                "value": "Specialisation: FOODA2",
+                                "cl_id": "cacb1dd9dbd3d850358b403c3a9619ff",
+                                "key": "code",
+                                "type": "x_f5sl_cl_areas_of_study"
+                            },
+                            "credit_points": "",
+                            "child_table": "x_f5sl_cl_areas_of_study",
+                            "description": "",
+                            "parent_table": "x_f5sl_cl_cs_container",
+                            "academic_item_active": "true",
+                            "abbr_name": "",
+                            "academic_item_version_name": "2021.02",
+                            "academic_item_credit_points": "24",
+                            "abbreviated_name_and_major": null,
+                            "academic_item_name": "Humanitarian Science and Technology",
+                            "academic_item_type": {
+                                "label": "Minor",
+                                "value": "minor"
+                            },
+                            "academic_item_pill_text": "Specialisation",
+                            "academic_item_url": "/undergraduate/specialisations/2021/FOODA2",
+                            "academic_item_state": "show",
+                            "academic_item_code": "FOODA2",
+                            "order": "1",
+                            "links": []
+                        }
+                    ],
+                    "dynamic_relationship": []
+                }
+            ],
+            "order": "0",
+            "description": "Students must complete 168 UOC of the following to satisfy the core requirements of this degree",
+            "relationship": [],
+            "dynamic_relationship": []
+        },
+        {
+            "related_academic_item": {
+                "value": "",
+                "cl_id": null,
+                "key": "code"
+            },
+            "horizontal_grouping": {
+                "label": null,
+                "value": null
+            },
+            "preface": "",
+            "dynamic_query": "",
+            "child_table": "",
+            "vertical_grouping": {
+                "label": "General Education",
+                "value": "GE"
+            },
+            "child_record": {
+                "value": "",
+                "cl_id": null,
+                "key": "",
+                "type": null
+            },
+            "footnote": "",
+            "credit_points_max": "12",
+            "cl_id": "62ec57bbdb33dc50eb6b147a3a961979",
+            "set_based": "false",
+            "map_type": "Course",
+            "title": "General Education",
+            "credit_points": "12",
+            "parent_record": {
+                "value": "Curriculum Structure: 2021.01.004",
+                "cl_id": "2eec57bbdb33dc50eb6b147a3a961976",
+                "key": "version_code",
+                "type": "x_f5sl_cl_curriculum_structure"
+            },
+            "parent_table": "x_f5sl_cl_curriculum_structure",
+            "parent_connector": {
+                "label": "AND",
+                "value": "AND"
+            },
+            "exclude": "false",
+            "related_ai": [],
+            "container": [],
+            "order": "6",
+            "description": "Students must take at least 12 UOC of the following courses.",
+            "relationship": [],
+            "dynamic_relationship": [
+                {
+                    "parent_record": {
+                        "value": "Curriculum Structure Container: any General Education course",
+                        "cl_id": "eeec57bbdb33dc50eb6b147a3a961978",
+                        "key": "title",
+                        "type": "x_f5sl_cl_cs_container"
+                    },
+                    "parent_table": "x_f5sl_cl_cs_container",
+                    "dynamic_mapping": "{\"dynamic_rule\":{\"type\":\"subject\",\"query",
+                    "cl_id": "a6ec57bbdb33dc50eb6b147a3a961979",
+                    "rule": "{\"operator_groups\":[{\"group_connector\":\"AND\",\"id\":\"new_sys_id_0.9573583396817931\",\"order\":\"1\",\"parent_record\":\"new_sys_id_0.47263881664548846\"},{\"group_connector\":\"NQ\",\"id\":\"new_sys_id_0.47263881664548846\",\"order\":\"1\",\"parent_record\":\"parent\"}],\"operator_group_members\":[{\"parent_record\":\"new_sys_id_0.9573583396817931\",\"order\":\"1\",\"id\":\"new_sys_id_0.33691367526202165\",\"map\":{\"field\":\"subclass\",\"operator_value\":\"=\",\"input_value\":\"subject\",\"table\":\"x_f5sl_cl_academic_item\",\"type\":\"choice\"}},{\"parent_record\":\"new_sys_id_0.9573583396817931\",\"id\":\"new_sys_id_1_0.20123226928229265\",\"order\":\"2\",\"map\":{\"field\":\"cs_tags\",\"input_value\":\"96d9bae4db2d4810fc9364e70596193a\",\"operator_value\":\"LIKE\",\"table\":\"x_f5sl_cl_academic_item\",\"type\":\"glide_list\"}},{\"parent_record\":\"new_sys_id_0.9573583396817931\",\"id\":\"new_sys_id_1_0.11098076554214642\",\"order\":\"3\",\"map\":{\"field\":\"parent_academic_org\",\"input_value\":\"5fa56ceb4f0093004aa6eb4f0310c7af\",\"operator_value\":\"!=\",\"table\":\"x_f5sl_cl_academic_item\",\"type\":\"reference\"}}]}",
+                    "mapping_type": "",
+                    "description": "any General Education course",
+                    "order": "1",
+                    "encodedURL": "/search?appliedFilters=eyJzZWFyY2giOnsiZXMiOnsicXVlcnkiOnsiYm9vbCI6eyJmaWx0ZXIiOlt7InRlcm1zIjp7ImNvbnRlbnR0eXBlIjpbInVuc3dfcHN1YmplY3QiXX19LHsidGVybSI6eyJsaXZlIjp0cnVlfX1dLCJtdXN0IjpbeyJxdWVyeV9zdHJpbmciOnsiZmllbGRzIjpbInVuc3dfcHN1YmplY3QuY3NUYWdzIl0sInF1ZXJ5IjoiKjk2ZDliYWU0ZGIyZDQ4MTBmYzkzNjRlNzA1OTYxOTNhKiJ9fSx7InF1ZXJ5X3N0cmluZyI6eyJmaWVsZHMiOlsidW5zd19wc3ViamVjdC5zdHVkeUxldmVsVmFsdWUiXSwicXVlcnkiOiJ1Z3JkIn19LHsicXVlcnlfc3RyaW5nIjp7ImZpZWxkcyI6WyJ1bnN3X3BzdWJqZWN0LmltcGxlbWVudGF0aW9uWWVhciJdLCJxdWVyeSI6IjIwMjEifX1dLCJtdXN0X25vdCI6W3sicXVlcnlfc3RyaW5nIjp7ImZpZWxkcyI6WyJ1bnN3X3BzdWJqZWN0LnBhcmVudEFjYWRlbWljT3JnIl0sInF1ZXJ5IjoiNWZhNTZjZWI0ZjAwOTMwMDRhYTZlYjRmMDMxMGM3YWYifX0seyJxdWVyeV9zdHJpbmciOnsiZmllbGRzIjpbInVuc3dfcHN1YmplY3QucGFyZW50QWNhZGVtaWNPcmciXSwicXVlcnkiOiI1ZmE1NmNlYjRmMDA5MzAwNGFhNmViNGYwMzEwYzdhZiJ9fV19fSwic29ydCI6W3sidW5zd19wc3ViamVjdC5jb2RlX2RvdHJhdyI6ImFzYyJ9XSwiZnJvbSI6MCwic2l6ZSI6MTV9LCJwcmVmaXgiOiJ1bnN3X3AifSwiZGVzY3JpcHRpb24iOiJhbnkgR2VuZXJhbCBFZHVjYXRpb24gY291cnNlIiwidmVyc2lvbiI6IjIwMjEuMDEiLCJjb2RlIjoiMzA2MSIsInRpdGxlIjoiRm9vZCBTY2llbmNlIChIb25vdXJzKSIsInJ1bGVJZCI6ImE2ZWM1N2JiZGIzM2RjNTBlYjZiMTQ3YTNhOTYxOTc5Iiwic291cmNlVVJMIjoiL3VuZGVyZ3JhZHVhdGUvcHJvZ3JhbXMvMjAyMS8zMDYxIiwic291cmNlVVJMVGV4dEtleSI6ImNzX3dpbGRjYXJkX3NvdXJjZV9iYWNrX2xpbmt0ZXh0Iiwic291cmNlVHlwZSI6IlByb2dyYW0ifQ==",
+                    "dynamic_query": "ct=subject&rx={\"dynamic_rule\":{\"type\":\"subject\",\"query",
+                    "links": []
+                }
+            ]
+        }
+    ],
+    "implementation_year": "2021",
+    "links": []
+}

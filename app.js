@@ -75,74 +75,110 @@ app.get('/specialisation', async function (request, response) {
 // Get course requirements for a single program
 app.get('/program', async function (request, response) {
   try {
-    // const file = require('./3563_2021_cs.json');
-    // const pCode = '3154';
+    const file = require('./testCS.json');
+    const pCode = '3061';
 
-    // const year = '2021';
-    // const faculty = '5a3a1d4f4f4d97404aa6eb4f0310c77a';
-    // const title = 'Actuarial Studies / Science';
-    // const studyLevel = 'ugrd';
-    // const minimumUOC = '192';
-    // const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode: pCode };
-    // await parseProgram(request.db, programInfo, file, year);
+    const year = '2021';
+    const faculty = '5fa56ceb4f0093004aa6eb4f0310c7af';
+    const title = 'Food Science (Honours)';
+    const studyLevel = 'ugrd';
+    const minimumUOC = '192';
+    const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode: pCode };
+    await parseProgram(request.db, programInfo, file, year);
 
-    // return response.send("done");
-
-    const programCode = 3154;
-    const type = "undergraduate";
+    return response.send("done");
 
     var postData = {
       "query": {
         "bool": {
           "must": [
             {
-              "query_string": {
-                "query": `unsw_pcourse.code: ${programCode}`
-              }
-            },
-            {
               "term": {
                 "live": true
               }
             },
-            {
-              "bool": {
-                "minimum_should_match": "100%",
-                "should": [
-                  {
-                    "query_string": {
-                      "fields": [
-                        "unsw_pcourse.studyLevelURL"
-                      ],
-                      "query": type
+            [
+              {
+                "bool": {
+                  "minimum_should_match": "100%",
+                  "should": [
+                    {
+                      "query_string": {
+                        "fields": [
+                          "unsw_pcourse.studyLevelValue"
+                        ],
+                        "query": "*ugrd*"
+                      }
                     }
-                  }
+                  ]
+                }
+              },
+              // {
+              //     "bool": {
+              //         "minimum_should_match": "100%",
+              //         "should": [
+              //             {
+              //                 "query_string": {
+              //                     "fields": [
+              //                         "unsw_pcourse.implementationYear"
+              //                     ],
+              //                     "query": "*2021*"
+              //                 }
+              //             }
+              //         ]
+              //     }
+              // },
+              {
+                "bool": {
+                  "minimum_should_match": "100%",
+                  "should": [
+                    {
+                      "query_string": {
+                        "fields": [
+                          "unsw_pcourse.active"
+                        ],
+                        "query": "*1*"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          ],
+          "filter": [
+            {
+              "terms": {
+                "contenttype": [
+                  "unsw_pcourse",
+                  "unsw_pcourse"
                 ]
               }
             }
           ]
         }
       },
-      "aggs": {
-        "implementationYear": {
-          "terms": {
-            "field": "unsw_pcourse.implementationYear_dotraw",
-            "size": 100
-          }
-        },
-        "availableInYears": {
-          "terms": {
-            "field": "unsw_pcourse.availableInYears_dotraw",
-            "size": 100
+      "sort": [
+        {
+          "unsw_pcourse.code_dotraw": {
+            "order": "asc"
           }
         }
-      },
-      "size": 100,
+      ],
+      "from": 0,
+      "size": 10,
+      "track_scores": true,
       "_source": {
         "includes": [
-          "versionNumber",
-          "availableInYears",
-          "implementationYear"
+          "*.code",
+          "*.name",
+          "*.award_titles",
+          "*.keywords",
+          "urlmap",
+          "contenttype"
+        ],
+        "excludes": [
+          "",
+          null
         ]
       }
     }
@@ -176,6 +212,7 @@ app.get('/program', async function (request, response) {
               const title = JSON.parse(currentYear.data).title;
               const studyLevel = JSON.parse(currentYear.data).study_level_single.value;
               const minimumUOC = JSON.parse(currentYear.data).credit_points;
+              const programCode = JSON.parse(currentYear.data).course_code;
               const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode };
 
               await parseProgram(request.db, programInfo, JSON.parse(currentYear.CurriculumStructure));
@@ -190,7 +227,7 @@ app.get('/program', async function (request, response) {
 
         await Promise.all(programPromises);
 
-        return response.send(`Finished parsing ${programCode}...`);
+        return response.send(`Finished parsing...`);
       })
       .catch(function (error) {
         console.log("AXIOS ERROR PARSING PROGRAM", error.response.status);

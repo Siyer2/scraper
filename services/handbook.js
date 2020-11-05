@@ -268,8 +268,11 @@ function getCoursesFromDynamicQuery(db, dynamicQuery, programInfo) {
 // To do: Change this to call the oldest server
 // If request fails, try again with another server
 var endpoints = [
-    { name: "getcoursesfromrule", endpoint: "https://fu1xsxq2sc.execute-api.us-east-1.amazonaws.com", lastRun: "" },
-    { name: "getcoursesfromrule2", endpoint: "https://ngy7jy6rb6.execute-api.us-east-1.amazonaws.com", lastRun: "" },
+    { name: "getcoursesfromrule", endpoint: "https://fu1xsxq2sc.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule2", endpoint: "https://ngy7jy6rb6.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule3", endpoint: "https://ly2j0hoxeg.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule4", endpoint: "https://ldzctc3zt0.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule5", endpoint: "https://hs83l66qof.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
 ]
 
 function getEndpoint() {
@@ -280,6 +283,7 @@ function getEndpoint() {
 
     // Update the time it was used
     endpointsSortedByUse[0].lastRun = Date.now();
+    endpointsSortedByUse[0].totalRuns = endpointsSortedByUse[0].totalRuns + 1;
 
     return endpointsSortedByUse[0].endpoint;
 }
@@ -287,7 +291,6 @@ function getEndpoint() {
 function getCoursesFromRule(db, rule, programInfo) {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log("Getting course from rule...");
             var config = {
                 method: 'post',
                 url: `${getEndpoint()}/getCourses`,
@@ -301,14 +304,15 @@ function getCoursesFromRule(db, rule, programInfo) {
                 .then(function (response) {
                     resolve(response.data);
                 })
-                .catch(function (error) {
-                    console.log("AXIOS ERROR GETTING COURSE FROM RULE", error);
-                    reject(error);
+                .catch(async function (error) {
+                    console.log("AXIOS ERROR GETTING COURSE FROM RULE", error.response.status);
+                    // If failed 
+                    await getCoursesFromRule(db, rule, programInfo)
+                    reject(error.response.status);
                 });
 
-            console.log("Got course from rule");
         } catch (ex) {
-            console.log("EXCEPTION GETTING COURSES FROM RULE", ex);
+            console.log("EXCEPTION GETTING COURSES FROM RULE"); // Need to print the exception again
             reject(ex);
         }
     });
@@ -409,7 +413,7 @@ function getGeneralEducation(db, { faculty, year, studyLevel }) {
             const courseCodes = response.data.contentlets.map((course) => { return { code: course.code, credit_points: course.credit_points || course.creditPoints || course.academic_item_credit_points } });
             resolve(courseCodes);
         } catch (ex) {
-            console.log("EXCEPTION GETTING GENERAL EDUCATION", ex);
+            console.log("EXCEPTION GETTING GENERAL EDUCATION"); // Need to print the exception again
             reject(ex);
         }
     });
@@ -444,7 +448,7 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                             resolve(courses);
                         }
                         // Get Majors/Minors
-                        else if (['DS', 'Undergraduate Major', 'Undergraduate Minor', 'Any Specialisation'].includes(rule.vertical_grouping.label)) {
+                        else if (['DS', 'Undergraduate Major', 'Undergraduate Minor', 'Any Specialisation', 'Honours Specialisation'].includes(rule.vertical_grouping.label)) {
                             // const getData = async () => {
                             //     return Promise.all(rule.relationship.map(specialisation => getSpecAsync(db, {
                             //         specialisation_code: specialisation.academic_item_code,
@@ -664,7 +668,7 @@ module.exports = {
 
                 await parseCurriculumStructure(db, curriculumStructure.container, programInfo);
 
-                console.log(`Parsed ${programInfo.title}, ${programInfo.year}...`);
+                console.log(`Parsed ${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
                 resolve();
             } catch (ex) {
                 console.log("EXCEPTION PARSING PROGRAM", ex);
