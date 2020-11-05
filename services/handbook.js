@@ -2,7 +2,7 @@ const axios = require('axios');
 const _ = require('lodash');
 
 //==== Helper functions ====//
-const { pushProgramToDB, updateRules, getSpecAsync, pushSpecialisationToDB } = require('./updateDB');
+const { pushProgramToDB, updateRules, pushSpecialisationToDB } = require('./updateDB');
 const { replaceAll, storeErrorInFile } = require('./helperFunctions');
 
 // Dynamic Queries
@@ -542,6 +542,134 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
     });
 }
 
+const getSpecAsync = async (db, specialisation, programInfo) => {
+    return getSpecialisation(db, specialisation, programInfo);
+}
+
+async function getSpecialisation(db, specialisation, programInfo) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // New request here:
+            var data = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "query_string": {
+                                    "query": `unsw_paos.code: ${specialisation.specialisation_code}`
+                                }
+                            },
+                            {
+                                "term": {
+                                    "live": true
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "minimum_should_match": "100%",
+                                    "should": [
+                                        {
+                                            "query_string": {
+                                                "fields": [
+                                                    "unsw_paos.studyLevelURL"
+                                                ],
+                                                "query": "undergraduate"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                "aggs": {
+                    "implementationYear": {
+                        "terms": {
+                            "field": "unsw_paos.implementationYear_dotraw",
+                            "size": 100
+                        }
+                    },
+                    "availableInYears": {
+                        "terms": {
+                            "field": "unsw_paos.availableInYears_dotraw",
+                            "size": 100
+                        }
+                    }
+                },
+                "size": 100,
+                "_source": {
+                    "includes": [
+                        "versionNumber",
+                        "availableInYears",
+                        "implementationYear"
+                    ]
+                }
+            }
+            var config = {
+                method: 'post',
+                url: 'https://www.handbook.unsw.edu.au/api/es/search',
+                headers: {
+                    'authority': 'www.handbook.unsw.edu.au',
+                    'sec-ch-ua': '"Chromium";v="86", ""Not\\A;Brand";v="99", "Google Chrome";v="86"',
+                    'accept': 'application/json, text/plain, */*',
+                    'sec-ch-ua-mobile': '?0',
+                    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36',
+                    'content-type': 'application/json;charset=UTF-8',
+                    'origin': 'https://www.handbook.unsw.edu.au',
+                    'sec-fetch-site': 'same-origin',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-dest': 'empty',
+                    'referer': 'https://www.handbook.unsw.edu.au/undergraduate/specialisations/2021/ACCTA1',
+                    'accept-language': 'en-US,en;q=0.9',
+                },
+                data: data
+            };
+
+            const response = await axios(config); // HERE
+            if (response.status === 403) {
+                // IP got blocked, need to try again
+                console.log("BLOCKED IP");
+            }
+
+            // Specialisation doesn't exist in this year
+            if (response.data.contentlets.length === 0) {
+                resolve(null);
+            }
+            else {
+                let programPromises = response.data.contentlets.map((currentYear) => {
+                    return new Promise(async (resolve, reject) => {
+                        try {
+                            const year = JSON.parse(currentYear.CurriculumStructure).implementation_year;
+                            const specialisationToPush = {
+                                specialisation_code: specialisation.specialisation_code,
+                                specialisation_type: specialisation.specialisation_type,
+                                implementation_year: String(year)
+                            }
+
+                            // Update DB with specialisation (TODO: Don't make this await)
+                            await pushSpecialisationToDB(db, specialisationToPush);
+                            await parseCurriculumStructure(db, JSON.parse(currentYear.CurriculumStructure).container, programInfo, specialisationToPush);
+
+                            resolve();
+                        } catch (ex) {
+                            console.log(`EXCEPTION PARSING SPECIALISATION STRUCTURE ${specialisation.specialisation_code}, ${JSON.parse(currentYear.CurriculumStructure).implementation_year}`, ex);
+                            reject(ex);
+                        }
+                    });
+                });
+
+                await Promise.all(programPromises);
+
+                resolve();
+            }
+
+        } catch (exception) {
+            console.log(`EXCEPTION GETTING SPECIALISATION FOR ${specialisation.specialisation_code} IN ${specialisation.implementation_year}`, exception);
+            reject(exception);
+        }
+    });
+}
+
 module.exports = {
     parseProgram: function (db, programInfo, curriculumStructure) {
         return new Promise(async (resolve, reject) => {
@@ -559,123 +687,11 @@ module.exports = {
             }
         });
     }, 
-    getSpecialisation: function (db, specialisation, programInfo) {
+    parseSpecialisation: function (db, specialisation, programInfo) {
         return new Promise(async (resolve, reject) => {
             try {
-                // New request here:
-                var data = {
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {
-                                    "query_string": {
-                                        "query": `unsw_paos.code: ${specialisation.specialisation_code}`
-                                    }
-                                },
-                                {
-                                    "term": {
-                                        "live": true
-                                    }
-                                },
-                                {
-                                    "bool": {
-                                        "minimum_should_match": "100%",
-                                        "should": [
-                                            {
-                                                "query_string": {
-                                                    "fields": [
-                                                        "unsw_paos.studyLevelURL"
-                                                    ],
-                                                    "query": "undergraduate"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "aggs": {
-                        "implementationYear": {
-                            "terms": {
-                                "field": "unsw_paos.implementationYear_dotraw",
-                                "size": 100
-                            }
-                        },
-                        "availableInYears": {
-                            "terms": {
-                                "field": "unsw_paos.availableInYears_dotraw",
-                                "size": 100
-                            }
-                        }
-                    },
-                    "size": 100,
-                    "_source": {
-                        "includes": [
-                            "versionNumber",
-                            "availableInYears",
-                            "implementationYear"
-                        ]
-                    }
-                }
-                var config = {
-                    method: 'post',
-                    url: 'https://www.handbook.unsw.edu.au/api/es/search',
-                    headers: {
-                        'authority': 'www.handbook.unsw.edu.au',
-                        'sec-ch-ua': '"Chromium";v="86", ""Not\\A;Brand";v="99", "Google Chrome";v="86"',
-                        'accept': 'application/json, text/plain, */*',
-                        'sec-ch-ua-mobile': '?0',
-                        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36',
-                        'content-type': 'application/json;charset=UTF-8',
-                        'origin': 'https://www.handbook.unsw.edu.au',
-                        'sec-fetch-site': 'same-origin',
-                        'sec-fetch-mode': 'cors',
-                        'sec-fetch-dest': 'empty',
-                        'referer': 'https://www.handbook.unsw.edu.au/undergraduate/specialisations/2021/ACCTA1',
-                        'accept-language': 'en-US,en;q=0.9',
-                    },
-                    data: data
-                };
-
-                const response = await axios(config); // HERE
-                if (response.status === 403) {
-                    // IP got blocked, need to try again
-                    console.log("BLOCKED IP");
-                }
-
-                // Specialisation doesn't exist in this year
-                if (response.data.contentlets.length === 0) {
-                    resolve(null);
-                }
-                else {
-                    let programPromises = response.data.contentlets.map((currentYear) => {
-                        return new Promise(async (resolve, reject) => {
-                            try {
-                                const year = JSON.parse(currentYear.CurriculumStructure).implementation_year;
-                                const specialisationToPush = {
-                                    specialisation_code: specialisation.specialisation_code,
-                                    specialisation_type: specialisation.specialisation_type,
-                                    implementation_year: String(year)
-                                }
-
-                                // Update DB with specialisation (TODO: Don't make this await)
-                                await pushSpecialisationToDB(db, specialisationToPush);
-                                await parseCurriculumStructure(db, JSON.parse(currentYear.CurriculumStructure).container, programInfo, specialisationToPush);
-
-                                resolve();
-                            } catch (ex) {
-                                console.log(`EXCEPTION PARSING SPECIALISATION STRUCTURE ${specialisation.specialisation_code}, ${JSON.parse(currentYear.CurriculumStructure).implementation_year}`, ex);
-                                reject(ex);
-                            }
-                        });
-                    });
-
-                    await Promise.all(programPromises);
-
-                    resolve();
-                }
-
+                await getSpecialisation(db, specialisation, programInfo);
+                resolve();
             } catch (exception) {
                 console.log(`EXCEPTION GETTING SPECIALISATION FOR ${specialisation.specialisation_code} IN ${specialisation.implementation_year}`, exception);
                 reject(exception);

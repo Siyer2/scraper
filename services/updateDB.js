@@ -114,10 +114,7 @@ module.exports = {
                 reject(ex);
             }
         });
-    }, 
-    getSpecAsync: async (db, specialisation, programInfo) => {
-        return getSpecialisation(db, specialisation, programInfo);
-    }, 
+    },
     pushSpecialisationToDB: function (db, specialisation) {
         return new Promise(async (resolve, reject) => {
             try {
