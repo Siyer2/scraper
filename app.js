@@ -541,20 +541,46 @@ app.get('/courses', async function (request, response) {
 app.get('/db', async function (request, response) {
 	try {
 		var dynamodb = new AWS.DynamoDB();
-		console.log("here");
 
-		dynamodb.listTables({}, function (err, data) {
-			if (err) {
-				console.log("ERROR", err);
+		//#region START DYNAMODB COMMANDS
+		// Creating courses table
+		var params = {
+			TableName: 'courses',
+			KeySchema: [
+				{
+					AttributeName: 'course_code',
+					KeyType: 'HASH',
+				},
+				{
+					AttributeName: 'implementation_year',
+					KeyType: 'RANGE',
+				}
+			],
+			AttributeDefinitions: [ // The names and types of all primary and index key attributes only
+				{
+					AttributeName: 'course_code',
+					AttributeType: 'S', // (S | N | B) for string, number, binary
+				},
+				{
+					AttributeName: 'implementation_year',
+					AttributeType: 'S', // (S | N | B) for string, number, binary
+				}
+			],
+			ProvisionedThroughput: {
+				ReadCapacityUnits: 1,
+				WriteCapacityUnits: 1,
 			}
-			else {
-				console.log(data);
-			}
+		};
+		dynamodb.createTable(params, function (err, data) {
+			if (err) console.log(err); // an error occurred
+			else console.log(data); // successful response
 		});
+		//#endregion
 
 		return response.send("done");
 	} catch (error) {
 		return response.status(400).json({ error });
 	}
 });
+
 module.exports = app;
