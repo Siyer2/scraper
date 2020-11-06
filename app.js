@@ -1,6 +1,7 @@
 'use strict';
 
 // eslint-disable-next-line import/no-unresolved
+require('dotenv').config()
 const express = require('express');
 const axios = require('axios');
 
@@ -21,20 +22,22 @@ app.use(function (req, res, next) {
   // Load database
   var AWS = require("aws-sdk");
   AWS.config.loadFromPath('./awsKeys.json');
-  AWS.config.update({
-    region: "ap-southeast-2",
-    endpoint: "http:localhost:8000"
-  });
-  // AWS.config.update({
-  // 	region: "ap-southeast-2",
-  // 	endpoint: "https://dynamodb.ap-southeast-2.amazonaws.com"
-  // });
-  var docClient = new AWS.DynamoDB.DocumentClient({
-    // accessKeyId: 'AKID',
-    endpoint: 'http://localhost:8000',
-    // region: 'REGION',
-    // secretAccessKey: 'SECRET'
-  });
+  
+  var docClient;
+  if (process.env.DEPLOYMENT === 'production') {
+    AWS.config.update({
+      region: "ap-southeast-2",
+      endpoint: "https://dynamodb.ap-southeast-2.amazonaws.com"
+    });
+  }
+  else {
+    AWS.config.update({
+      region: "ap-southeast-2",
+      endpoint: "http://localhost:8000"
+    });
+  }
+
+  var docClient = new AWS.DynamoDB.DocumentClient();
   req.db = docClient;
 
   next();
