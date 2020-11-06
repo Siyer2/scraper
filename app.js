@@ -4,6 +4,7 @@
 require('dotenv').config()
 const express = require('express');
 const axios = require('axios');
+const _ = require('lodash');
 
 const app = express();
 
@@ -371,7 +372,166 @@ app.get('/program', async function (request, response) {
 // Store all courses
 app.get('/courses', async function (request, response) {
 	try {
+		// Get all courses
+		var postData = {
+			"query": {
+				"bool": {
+					"must": [
+						{
+							"term": {
+								"live": true
+							}
+						},
+						[
+							{
+								"bool": {
+									"minimum_should_match": "100%",
+									"should": [
+										{
+											"query_string": {
+												"fields": [
+													"unsw_psubject.implementationYear"
+												],
+												"query": "*2021*"
+											}
+										}
+									]
+								}
+							},
+							{
+								"bool": {
+									"minimum_should_match": "100%",
+									"should": [
+										{
+											"query_string": {
+												"fields": [
+													"unsw_psubject.studyLevelValue"
+												],
+												"query": "*ugrd*"
+											}
+										}
+									]
+								}
+							},
+							{
+								"bool": {
+									"minimum_should_match": "100%",
+									"should": [
+										{
+											"query_string": {
+												"fields": [
+													"unsw_psubject.active"
+												],
+												"query": "*1*"
+											}
+										}
+									]
+								}
+							}
+						]
+					],
+					"filter": [
+						{
+							"terms": {
+								"contenttype": [
+									"unsw_psubject"
+								]
+							}
+						}
+					]
+				}
+			},
+			"sort": [
+				{
+					"unsw_psubject.code_dotraw": {
+						"order": "asc"
+					}
+				}
+			],
+			"from": 0,
+			"size": 30,
+			"track_scores": true,
+			"_source": {
+				"includes": [
+					"*.code",
+					"*.name",
+					"*.award_titles",
+					"*.keywords",
+					"urlmap",
+					"contenttype"
+				],
+				"excludes": [
+					"",
+					null
+				]
+			}
+		}
+		var config = {
+			method: 'post',
+			url: 'https://www.handbook.unsw.edu.au/api/es/search',
+			headers: {
+				'authority': 'www.handbook.unsw.edu.au',
+				'sec-ch-ua': '"Chromium";v="86", ""Not\\A;Brand";v="99", "Google Chrome";v="86"',
+				'accept': 'application/json, text/plain, */*',
+				'sec-ch-ua-mobile': '?0',
+				'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36',
+				'content-type': 'application/json;charset=UTF-8',
+				'origin': 'https://www.handbook.unsw.edu.au',
+				'sec-fetch-site': 'same-origin',
+				'sec-fetch-mode': 'cors',
+				'sec-fetch-dest': 'empty',
+				'referer': 'https://www.handbook.unsw.edu.au/undergraduate/programs/2021/3502?year=2021',
+				'accept-language': 'en-US,en;q=0.9',
+			},
+			data: postData
+		};
+		const res = await axios.request(config);
 
+		// Format into array ready for batch write
+		const formattedCourses = res.data.contentlets.map((course) => {
+			return {
+				"PutRequest": {
+					"Item": {
+						course_code: course.code,
+						implementation_year: course.implementationYear,
+						credit_points: course.creditPoints,
+						link: course.urlMap
+					}
+				}
+			}
+		});
+		
+		// Split into arrays of length 25 each
+		const chunkedCourses = _.chunk(formattedCourses, 25);
+		
+		// Push to DB
+		const pushPromises = chunkedCourses.map((chunk) => {
+			return new Promise(async (resolve, reject) => {
+				try {
+					const params = { 
+						RequestItems: {
+							courses: chunk
+						}
+					};
+
+					request.db.batchWrite(params, function (err, data) {
+						if (err) {
+							console.log("AWS ERROR BATCH WRITING COURSES", err);
+							reject(err);
+						}
+						else {
+							resolve();
+						}
+					});
+				} catch (ex) {
+					console.log("EXCEPTION WITH PUSHPROMISES", ex);
+					reject(ex);
+				}
+			});
+		});
+		await Promise.all(pushPromises);
+		
+		return response.send(`Successfully pushed ${res.data.contentlets.length} courses`);
 	} catch (error) {
 		return response.status(400).json({ error });
 	}
