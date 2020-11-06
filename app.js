@@ -201,18 +201,18 @@ app.get('/specialisation', async function (request, response) {
 // Get course requirements for a single program
 app.get('/program', async function (request, response) {
   try {
-    const file = require('./testCS.json');
-    const pCode = '3061';
+    // const file = require('./testCS.json');
+    // const pCode = '3061';
 
-    const year = '2021';
-    const faculty = '5fa56ceb4f0093004aa6eb4f0310c7af';
-    const title = 'Food Science (Honours)';
-    const studyLevel = 'ugrd';
-    const minimumUOC = '192';
-    const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode: pCode };
-    await parseProgram(request.db, programInfo, file);
+    // const year = '2021';
+    // const faculty = '5fa56ceb4f0093004aa6eb4f0310c7af';
+    // const title = 'Food Science (Honours)';
+    // const studyLevel = 'ugrd';
+    // const minimumUOC = '192';
+    // const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode: pCode };
+    // await parseProgram(request.db, programInfo, file);
 
-    return response.send("done");
+    // return response.send("done");
 
     var postData = {
       "query": {
