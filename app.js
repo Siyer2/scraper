@@ -5,6 +5,7 @@ require('dotenv').config()
 const express = require('express');
 const axios = require('axios');
 const _ = require('lodash');
+var AWS = require("aws-sdk");
 
 const app = express();
 
@@ -21,14 +22,13 @@ const { getProgramInfo } = require('./services/helperFunctions');
 // Middleware
 app.use(function (req, res, next) {
 	// Load database
-	var AWS = require("aws-sdk");
 	AWS.config.loadFromPath('./awsKeys.json');
 
 	var docClient;
 	if (process.env.DEPLOYMENT === 'production') {
 		AWS.config.update({
 			region: "ap-southeast-2",
-			endpoint: "https://dynamodb.ap-southeast-2.amazonaws.com"
+			endpoint: "https://dynamodb.ap-southeast-2.amazonaws.com", 
 		});
 	}
 	else {
@@ -537,4 +537,24 @@ app.get('/courses', async function (request, response) {
 	}
 });
 
+//==== Calls to initialise the Dynamo DB ====//
+app.get('/db', async function (request, response) {
+	try {
+		var dynamodb = new AWS.DynamoDB();
+		console.log("here");
+
+		dynamodb.listTables({}, function (err, data) {
+			if (err) {
+				console.log("ERROR", err);
+			}
+			else {
+				console.log(data);
+			}
+		});
+
+		return response.send("done");
+	} catch (error) {
+		return response.status(400).json({ error });
+	}
+});
 module.exports = app;
