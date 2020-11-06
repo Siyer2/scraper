@@ -273,6 +273,16 @@ var endpoints = [
     { name: "getcoursesfromrule3", endpoint: "https://ly2j0hoxeg.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
     { name: "getcoursesfromrule4", endpoint: "https://ldzctc3zt0.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
     { name: "getcoursesfromrule5", endpoint: "https://hs83l66qof.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule6", endpoint: "https://x5glf5meo5.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule7", endpoint: "https://4i7oe0pwl5.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule8", endpoint: "https://rvf92rxgm8.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule9", endpoint: "https://xhzdntn941.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule10", endpoint: "https://6s1qnbboui.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule11", endpoint: "https://xu29x24o8g.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule12", endpoint: "https://xwuxmalq6f.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule13", endpoint: "https://vmoey2neae.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule14", endpoint: "https://pq95wzuon0.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule15", endpoint: "https://yrjmj7k7ek.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
 ]
 
 function getEndpoint() {
