@@ -12,6 +12,7 @@ const app = express();
 //==== Functions ====//
 const { parseProgram } = require('./services/handbook');
 const { getProgramInfo } = require('./services/helperFunctions');
+const { backOff } = require('exponential-backoff');
 
 // Error handler
 // app.use((err, req, res) => {
@@ -369,6 +370,57 @@ app.get('/program', async function (request, response) {
 	}
 });
 
+function batchAndUploadCourses(db, courses) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			// Split into arrays of length 25 each
+			const chunkedCourses = _.chunk(courses, 25);
+
+			// Push to DB
+			var unprocessedItems = [];
+			const pushPromises = chunkedCourses.map((chunk) => {
+				return new Promise(async (resolve, reject) => {
+					try {
+						const params = {
+							RequestItems: {
+								courses: chunk
+							}
+						};
+
+						db.batchWrite(params, function (err, data) {
+							if (err) {
+								console.log("AWS ERROR BATCH WRITING COURSES", err);
+								reject(err);
+							}
+							else {
+								// console.log(`Successfully pushed ${chunk.length} courses!`);
+								if (data.UnprocessedItems.courses) {
+									unprocessedItems = unprocessedItems.concat(data.UnprocessedItems.courses);
+								}
+								resolve();
+							}
+						});
+					} catch (ex) {
+						console.log("EXCEPTION WITH PUSHPROMISES", ex);
+						reject(ex);
+					}
+				});
+			});
+			await Promise.all(pushPromises);
+
+			if (unprocessedItems.length) {
+				console.log(`Retrying ${unprocessedItems.length} unprocessed`);
+				await backOff(() => batchAndUploadCourses(db, unprocessedItems));
+			}
+
+			resolve();
+		} catch (ex) {
+			console.log("EXCEPTION BATCHING AND UPLOADING COURSES", ex);
+			reject(ex);
+		}
+	});
+}
+
 // Store all courses
 app.get('/courses', async function (request, response) {
 	try {
@@ -383,21 +435,21 @@ app.get('/courses', async function (request, response) {
 							}
 						},
 						[
-							{
-								"bool": {
-									"minimum_should_match": "100%",
-									"should": [
-										{
-											"query_string": {
-												"fields": [
-													"unsw_psubject.implementationYear"
-												],
-												"query": "*2021*"
-											}
-										}
-									]
-								}
-							},
+							// {
+							//     "bool": {
+							//         "minimum_should_match": "100%",
+							//         "should": [
+							//             {
+							//                 "query_string": {
+							//                     "fields": [
+							//                         "unsw_psubject.implementationYear"
+							//                     ],
+							//                     "query": "*2021*"
+							//                 }
+							//             }
+							//         ]
+							//     }
+							// },
 							{
 								"bool": {
 									"minimum_should_match": "100%",
@@ -407,7 +459,7 @@ app.get('/courses', async function (request, response) {
 												"fields": [
 													"unsw_psubject.studyLevelValue"
 												],
-												"query": "*ugrd*"
+												"query": "*rsch*"
 											}
 										}
 									]
@@ -449,7 +501,7 @@ app.get('/courses', async function (request, response) {
 				}
 			],
 			"from": 0,
-			"size": 30,
+			"size": 10000,
 			"track_scores": true,
 			"_source": {
 				"includes": [
@@ -501,35 +553,7 @@ app.get('/courses', async function (request, response) {
 			}
 		});
 		
-		// Split into arrays of length 25 each
-		const chunkedCourses = _.chunk(formattedCourses, 25);
-		
-		// Push to DB
-		const pushPromises = chunkedCourses.map((chunk) => {
-			return new Promise(async (resolve, reject) => {
-				try {
-					const params = { 
-						RequestItems: {
-							courses: chunk
-						}
-					};
-
-					request.db.batchWrite(params, function (err, data) {
-						if (err) {
-							console.log("AWS ERROR BATCH WRITING COURSES", err);
-							reject(err);
-						}
-						else {
-							resolve();
-						}
-					});
-				} catch (ex) {
-					console.log("EXCEPTION WITH PUSHPROMISES", ex);
-					reject(ex);
-				}
-			});
-		});
-		await Promise.all(pushPromises);
+		await batchAndUploadCourses(request.db, formattedCourses);
 		
 		return response.send(`Successfully pushed ${res.data.contentlets.length} courses`);
 	} catch (error) {
@@ -543,38 +567,17 @@ app.get('/db', async function (request, response) {
 		var dynamodb = new AWS.DynamoDB();
 
 		//#region START DYNAMODB COMMANDS
-		// Creating courses table
+
+		// Count items in a table
 		var params = {
 			TableName: 'courses',
-			KeySchema: [
-				{
-					AttributeName: 'course_code',
-					KeyType: 'HASH',
-				},
-				{
-					AttributeName: 'implementation_year',
-					KeyType: 'RANGE',
-				}
-			],
-			AttributeDefinitions: [ // The names and types of all primary and index key attributes only
-				{
-					AttributeName: 'course_code',
-					AttributeType: 'S', // (S | N | B) for string, number, binary
-				},
-				{
-					AttributeName: 'implementation_year',
-					AttributeType: 'S', // (S | N | B) for string, number, binary
-				}
-			],
-			ProvisionedThroughput: {
-				ReadCapacityUnits: 1,
-				WriteCapacityUnits: 1,
-			}
+			Select: 'COUNT'
 		};
-		dynamodb.createTable(params, function (err, data) {
+		dynamodb.scan(params, function (err, data) {
 			if (err) console.log(err); // an error occurred
 			else console.log(data); // successful response
 		});
+
 		//#endregion
 
 		return response.send("done");
