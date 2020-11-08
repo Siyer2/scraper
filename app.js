@@ -547,7 +547,8 @@ app.get('/courses', async function (request, response) {
 						course_code: course.code,
 						implementation_year: course.implementationYear,
 						credit_points: course.creditPoints,
-						link: course.urlMap
+						link: course.urlMap, 
+						name: course.title
 					}
 				}
 			}
