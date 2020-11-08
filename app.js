@@ -66,21 +66,21 @@ app.get('/specialisation', async function (request, response) {
 							}
 						},
 						[
-							// {
-							//     "bool": {
-							//         "minimum_should_match": "100%",
-							//         "should": [
-							//             {
-							//                 "query_string": {
-							//                     "fields": [
-							//                         "unsw_paos.implementationYear"
-							//                     ],
-							//                     "query": "*2021*"
-							//                 }
-							//             }
-							//         ]
-							//     }
-							// },
+							{
+							    "bool": {
+							        "minimum_should_match": "100%",
+							        "should": [
+							            {
+							                "query_string": {
+							                    "fields": [
+							                        "unsw_paos.implementationYear"
+							                    ],
+							                    "query": "*2020*"
+							                }
+							            }
+							        ]
+							    }
+							},
 							{
 								"bool": {
 									"minimum_should_match": "100%",
@@ -132,7 +132,7 @@ app.get('/specialisation', async function (request, response) {
 				}
 			],
 			"from": 0,
-			"size": 300,
+			"size": 1000,
 			"track_scores": true,
 			"_source": {
 				"includes": [
@@ -198,6 +198,135 @@ app.get('/specialisation', async function (request, response) {
 				return response.status(400).json({ error });
 			});
 
+	} catch (error) {
+		return response.status(400).json({ error });
+	}
+});
+
+app.get('/individualSpec', async function (request, response) {
+	try {
+		const specCode = 'ZPEMO1';
+		const year = '2019';
+
+		var postData = {
+			"query": {
+				"bool": {
+					"must": [
+						{
+							"query_string": {
+								"query": `unsw_paos.code: ${specCode}`
+							}
+						},
+						{
+							"term": {
+								"live": true
+							}
+						},
+						{
+							"bool": {
+								"minimum_should_match": "100%",
+								"should": [
+									{
+										"query_string": {
+											"fields": [
+												"unsw_paos.studyLevelURL"
+											],
+											"query": "undergraduate"
+										}
+									}
+								]
+							}
+						}, 
+						{
+							"bool": {
+								"minimum_should_match": "100%",
+								"should": [
+									{
+										"query_string": {
+											"fields": [
+												"unsw_paos.implementationYear"
+											],
+											"query": `*${year}*`
+										}
+									}
+								]
+							}
+						},
+					]
+				}
+			},
+			"aggs": {
+				"implementationYear": {
+					"terms": {
+						"field": "unsw_paos.implementationYear_dotraw",
+						"size": 100
+					}
+				},
+				"availableInYears": {
+					"terms": {
+						"field": "unsw_paos.availableInYears_dotraw",
+						"size": 100
+					}
+				}
+			},
+			"size": 100,
+			"_source": {
+				"includes": [
+					"versionNumber",
+					"availableInYears",
+					"implementationYear"
+				]
+			}
+		}
+
+		var config = {
+			method: 'post',
+			url: 'https://www.handbook.unsw.edu.au/api/es/search',
+			headers: {
+				'authority': 'www.handbook.unsw.edu.au',
+				'sec-ch-ua': '"Chromium";v="86", ""Not\\A;Brand";v="99", "Google Chrome";v="86"',
+				'accept': 'application/json, text/plain, */*',
+				'sec-ch-ua-mobile': '?0',
+				'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36',
+				'content-type': 'application/json;charset=UTF-8',
+				'origin': 'https://www.handbook.unsw.edu.au',
+				'sec-fetch-site': 'same-origin',
+				'sec-fetch-mode': 'cors',
+				'sec-fetch-dest': 'empty',
+				'referer': 'https://www.handbook.unsw.edu.au/undergraduate/programs/2021/3502?year=2021',
+				'accept-language': 'en-US,en;q=0.9',
+			},
+			data: postData
+		};
+		axios(config)
+			.then(async function (res) {
+				let programPromises = res.data.contentlets.map((currentYear) => {
+					return new Promise(async (resolve, reject) => {
+						try {
+							const programInfo = getProgramInfo(JSON.parse(currentYear.data));
+
+							await parseProgram(request.db, programInfo, JSON.parse(currentYear.CurriculumStructure), {
+								specialisation_code: programInfo.programCode,
+								specialisation_type: programInfo.specialisation_type,
+								implementation_year: programInfo.year
+							});
+
+							resolve();
+						} catch (ex) {
+							console.log("EXCEPTION PARSING PROGRAM", ex);
+							reject(ex);
+						}
+					});
+				});
+
+				await Promise.all(programPromises);
+
+				return response.send(`Successfully pushed ${res.data.contentlets.length} specialisation`);
+			})
+			.catch(function (error) {
+				console.log("AXIOS ERROR PARSING PROGRAM", error);
+				return response.status(400).json({ error });
+			});
 	} catch (error) {
 		return response.status(400).json({ error });
 	}
@@ -571,7 +700,7 @@ app.get('/db', async function (request, response) {
 
 		// Count items in a table
 		var params = {
-			TableName: 'courses',
+			TableName: 'specialisations',
 			Select: 'COUNT'
 		};
 		dynamodb.scan(params, function (err, data) {

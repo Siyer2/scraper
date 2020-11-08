@@ -284,6 +284,11 @@ var endpoints = [
     { name: "getcoursesfromrule13", endpoint: "https://vmoey2neae.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
     { name: "getcoursesfromrule14", endpoint: "https://pq95wzuon0.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
     { name: "getcoursesfromrule15", endpoint: "https://yrjmj7k7ek.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule16", endpoint: "https://bakljlffr5.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule17", endpoint: "https://iawoixuihb.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule18", endpoint: "https://5jfebmdafb.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule19", endpoint: "https://rqh2zovgyg.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
+    { name: "getcoursesfromrule20", endpoint: "https://3qcc2ztiui.execute-api.us-east-1.amazonaws.com", lastRun: "", totalRuns: 0 },
 ]
 
 function getEndpoint() {
@@ -320,8 +325,8 @@ function getCoursesFromRule(db, rule, programInfo, specialisation) {
                     console.log(`AXIOS ERROR ${isSpec}${programInfo.programCode}_${programInfo.year}`);
                     // console.log("AXIOS ERROR GETTING COURSE FROM RULE", error);
                     // If failed 
-                    await backOff(() => getCoursesFromRule(db, rule, programInfo, specialisation));
-                    reject(error);
+                    // await backOff(() => getCoursesFromRule(db, rule, programInfo, specialisation));
+                    reject();
                 });
 
         } catch (ex) {
@@ -365,113 +370,119 @@ function getGeneralEducation(db, { faculty, year, studyLevel }) {
 function parseCurriculumStructure(db, rules, programInfo, specialisation) {
     return new Promise(async (resolve, reject) => {
         try {
-            var rulesToPush = {
-                Core_Course: [],
-                Prescribed_Elective: [],
-                Information_Rule: [],
-                Maturity_Rule: [],
-                Limit_Rule: [],
-                Free_Elective: [],
-                minor: [],
-                major: [],
-                honours: [],
-                specialisation: [],
-                One_of_the_following: [],
-                General_Education: []
+            if (!rules || !rules.length) {
+                console.log(`No rules found for ${specialisation ? 'spec ' : ''}${programInfo.programCode} ${programInfo.implementation_year}`);
+                resolve();
             }
+            else {
+                var rulesToPush = {
+                    Core_Course: [],
+                    Prescribed_Elective: [],
+                    Information_Rule: [],
+                    Maturity_Rule: [],
+                    Limit_Rule: [],
+                    Free_Elective: [],
+                    minor: [],
+                    major: [],
+                    honours: [],
+                    specialisation: [],
+                    One_of_the_following: [],
+                    General_Education: []
+                }
 
-            const promises = rules.map((rule) => {
-                return new Promise(async (resolve, reject) => {
-                    try {
-                        // Handle Core Courses and Prescribed Electives
-                        if (['Core Course', 'Prescribed Elective', 'One of the following'].includes(rule.vertical_grouping.label)) {
-                            const courses = await getCoursesFromRule(db, rule, programInfo, specialisation);
-                            rulesToPush[replaceAll(rule.vertical_grouping.label, ' ', '_')].push(courses);
+                const promises = rules.map((rule) => {
+                    return new Promise(async (resolve, reject) => {
+                        try {
+                            // Handle Core Courses and Prescribed Electives
+                            if (['Core Course', 'Prescribed Elective', 'One of the following'].includes(rule.vertical_grouping.label)) {
+                                const courses = await getCoursesFromRule(db, rule, programInfo, specialisation);
+                                rulesToPush[replaceAll(rule.vertical_grouping.label, ' ', '_')].push(courses);
 
-                            resolve(courses);
-                        }
-                        // Get Majors/Minors
-                        else if (['DS', 'Undergraduate Major', 'Undergraduate Minor', 'Any Specialisation', 'Honours Specialisation'].includes(rule.vertical_grouping.label)) {
-                            // const getData = async () => {
-                            //     return Promise.all(rule.relationship.map(specialisation => getSpecAsync(db, {
-                            //         specialisation_code: specialisation.academic_item_code,
-                            //         specialisation_description: specialisation.description,
-                            //         specialisation_type: specialisation.academic_item_type.value,
-                            //         implementation_year: specialisation.implementation_year
-                            //     }, programInfo)));
-                            // }
+                                resolve(courses);
+                            }
+                            // Get Majors/Minors
+                            else if (['DS', 'Undergraduate Major', 'Undergraduate Minor', 'Any Specialisation', 'Honours Specialisation'].includes(rule.vertical_grouping.label)) {
+                                // const getData = async () => {
+                                //     return Promise.all(rule.relationship.map(specialisation => getSpecAsync(db, {
+                                //         specialisation_code: specialisation.academic_item_code,
+                                //         specialisation_description: specialisation.description,
+                                //         specialisation_type: specialisation.academic_item_type.value,
+                                //         implementation_year: specialisation.implementation_year
+                                //     }, programInfo)));
+                                // }
 
-                            rule.relationship.map((specialisation) => {
-                                rulesToPush[specialisation.academic_item_type.value].push(specialisation.academic_item_code);
-                            });
+                                rule.relationship.map((specialisation) => {
+                                    rulesToPush[specialisation.academic_item_type.value].push(specialisation.academic_item_code);
+                                });
 
-                            resolve();
+                                resolve();
 
-                            // getData().then(data => {
-                            //     resolve(data); // Do I have to wait for this?
-                            // });
-                        }
-                        // General Education
-                        else if (rule.vertical_grouping.label === 'General Education') {
-                            if (rule.relationship.length || rule.dynamic_relationship.length > 1) {
-                                const specName = specialisation ? `_${specialisation.specialisation_code}` : '';
-                                console.log(`WARNING: Weird GE found in ${programInfo.programCode}_${programInfo.year}${specName}`);
+                                // getData().then(data => {
+                                //     resolve(data); // Do I have to wait for this?
+                                // });
+                            }
+                            // General Education
+                            else if (rule.vertical_grouping.label === 'General Education') {
+                                if (rule.relationship.length || rule.dynamic_relationship.length > 1) {
+                                    const specName = specialisation ? `_${specialisation.specialisation_code}` : '';
+                                    console.log(`WARNING: Weird GE found in ${programInfo.programCode}_${programInfo.year}${specName}`);
+                                }
+
+                                const generalEducation = await getGeneralEducation(db, programInfo);
+                                const returnObject = {
+                                    credit_points: rule.credit_points,
+                                    courses: generalEducation,
+                                    description: rule.description
+                                }
+
+                                rulesToPush[replaceAll(rule.vertical_grouping.label, ' ', '_')].push(returnObject);
+
+                                // await updateItemWithCourses(db, programInfo, specialisation, returnObject, rule.vertical_grouping.label);
+                                resolve(returnObject);
+                            }
+                            // Limit Rule and Free Elective
+                            else if (['Limit Rule', 'Free Elective'].includes(rule.vertical_grouping.label)) {
+                                const courses = await getCoursesFromRule(db, rule, programInfo, specialisation);
+                                rulesToPush[rule.vertical_grouping.label.replace(' ', '_')].push(courses);
+
+                                resolve(courses);
+                            }
+                            else if (['Maturity Rule', 'Information Rule', 'SR'].includes(rule.vertical_grouping.label)) {
+                                const newRule = {
+                                    description: rule.description,
+                                    url: rule.dynamic_relationship.length ? rule.dynamic_relationship[0].encodedURL : null
+                                }
+
+                                const ruleName = rule.vertical_grouping.label === 'Maturity Rule' ? 'Maturity_Rule' : 'Information_Rule';
+                                rulesToPush[ruleName].push(newRule);
+
+                                resolve();
+                            }
+                            else {
+                                if (!rule.container || !rule.container.length) {
+                                    const specName = specialisation ? `_${specialisation.specialisation_code}.json` : '.json';
+                                    console.log(`Unknown rule for ${programInfo.programCode}_${programInfo.year}${specName}: ${rule.vertical_grouping.label}...`);
+                                    await storeErrorInFile(`${programInfo.programCode}_${programInfo.year}${specName}`, JSON.stringify(rule));
+                                }
+
+                                resolve(null);
                             }
 
-                            const generalEducation = await getGeneralEducation(db, programInfo);
-                            const returnObject = {
-                                credit_points: rule.credit_points,
-                                courses: generalEducation,
-                                description: rule.description
+                            if (rule.container && rule.container.length) {
+                                await parseCurriculumStructure(db, rule.container, programInfo, specialisation);
                             }
-
-                            rulesToPush[replaceAll(rule.vertical_grouping.label, ' ', '_')].push(returnObject);
-
-                            // await updateItemWithCourses(db, programInfo, specialisation, returnObject, rule.vertical_grouping.label);
-                            resolve(returnObject);
+                        } catch (ex) {
+                            console.log("EXCEPTION PARSING RULES IN PROMISES", ex);
+                            reject(ex);
                         }
-                        // Limit Rule and Free Elective
-                        else if (['Limit Rule', 'Free Elective'].includes(rule.vertical_grouping.label)) {
-                            const courses = await getCoursesFromRule(db, rule, programInfo, specialisation);
-                            rulesToPush[rule.vertical_grouping.label.replace(' ', '_')].push(courses);
-
-                            resolve(courses);
-                        }
-                        else if (['Maturity Rule', 'Information Rule', 'SR'].includes(rule.vertical_grouping.label)) {
-                            const newRule = {
-                                description: rule.description,
-                                url: rule.dynamic_relationship.length ? rule.dynamic_relationship[0].encodedURL : null
-                            }
-
-                            const ruleName = rule.vertical_grouping.label === 'Maturity Rule' ? 'Maturity_Rule' : 'Information_Rule';
-                            rulesToPush[ruleName].push(newRule);
-
-                            resolve();
-                        }
-                        else {
-                            if (!rule.container || !rule.container.length) {
-                                const specName = specialisation ? `_${specialisation.specialisation_code}.json` : '.json';
-                                console.log(`Unknown rule for ${programInfo.programCode}_${programInfo.year}${specName}: ${rule.vertical_grouping.label}...`);
-                                await storeErrorInFile(`${programInfo.programCode}_${programInfo.year}${specName}`, JSON.stringify(rule));
-                            }
-
-                            resolve(null);
-                        }
-
-                        if (rule.container && rule.container.length) {
-                            await parseCurriculumStructure(db, rule.container, programInfo, specialisation);
-                        }
-                    } catch (ex) {
-                        console.log("EXCEPTION PARSING RULES IN PROMISES", ex);
-                        reject(ex);
-                    }
+                    });
                 });
-            });
 
-            const parsedRules = await Promise.all(promises);
-            updateRules(db, programInfo, specialisation, rulesToPush);
+                const parsedRules = await Promise.all(promises);
+                updateRules(db, programInfo, specialisation, rulesToPush);
 
-            resolve(parsedRules);
+                resolve(parsedRules);
+            }
         } catch (exception) {
             console.log("EXCEPTION PARSING CURRICULUM STRUCTURE", exception);
             reject(exception);
