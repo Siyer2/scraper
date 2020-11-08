@@ -387,14 +387,15 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                     honours: [],
                     specialisation: [],
                     One_of_the_following: [],
-                    General_Education: []
+                    General_Education: [], 
+                    Recommended: []
                 }
 
                 const promises = rules.map((rule) => {
                     return new Promise(async (resolve, reject) => {
                         try {
                             // Handle Core Courses and Prescribed Electives
-                            if (['Core Course', 'Prescribed Elective', 'One of the following'].includes(rule.vertical_grouping.label)) {
+                            if (['Core Course', 'Prescribed Elective', 'One of the following', 'Recommended'].includes(rule.vertical_grouping.label)) {
                                 const courses = await getCoursesFromRule(db, rule, programInfo, specialisation);
                                 rulesToPush[replaceAll(rule.vertical_grouping.label, ' ', '_')].push(courses);
 

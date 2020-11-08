@@ -80,6 +80,11 @@ module.exports = {
                     oneOfTheFollowings = rulesToPush.One_of_the_following.concat(existingDocument['oneOfTheFollowings']);
                 }
 
+                var recommendeds;
+                if (existingDocument && rulesToPush.Recommended.length && existingDocument['recommendeds'] && existingDocument['recommendeds'].length) {
+                    recommendeds = rulesToPush.Recommended.concat(existingDocument['recommendeds']);
+                }
+
                 // Update the program
                 var updateParams = {
                     ...specialisation ? { specialisation_code: specialisation.specialisation_code } : { code: String(programInfo.programCode) },
@@ -94,6 +99,7 @@ module.exports = {
                     ...rulesToPush.Core_Course.length && { 'coreCourses': coreCourses ? coreCourses : rulesToPush.Core_Course },
                     ...rulesToPush.Prescribed_Elective.length && { 'prescribedElectives': prescribedElectives ? prescribedElectives : rulesToPush.Prescribed_Elective },
                     ...rulesToPush.One_of_the_following.length && { 'oneOfTheFollowings': oneOfTheFollowings ? oneOfTheFollowings : rulesToPush.One_of_the_following },
+                    ...rulesToPush.Recommended.length && { 'recommendeds': recommendeds ? recommendeds : rulesToPush.Recommended },
                     ...rulesToPush.specialisation.length && { 'specialisations': rulesToPush.specialisation },
                     ...rulesToPush.General_Education && { 'generalEducation': rulesToPush.General_Education }
                 }

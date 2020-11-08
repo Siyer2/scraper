@@ -75,7 +75,7 @@ app.get('/specialisation', async function (request, response) {
 							                    "fields": [
 							                        "unsw_paos.implementationYear"
 							                    ],
-							                    "query": "*2020*"
+							                    "query": "*2021*"
 							                }
 							            }
 							        ]
@@ -206,19 +206,10 @@ app.get('/specialisation', async function (request, response) {
 app.get('/multipleSpecs', async function (request, response) {
 	try {
 		const specCodes = [
-			'COMDF2', 
-			'ECONF2', 
-			'FRENA1', 
-			'HISTD2', 
-			'ITALB2', 
-			'JAPND2', 
-			'KORED2', 
-			'KOREF1', 
-			'LEGLB2', 
-			'POLSG2', 
-			'THSTC1'
+			'PHARB1', 
+			'PHSLB1'
 		];
-		const year = '2020';
+		const year = '2021';
 
 		const specPromises = specCodes.map((specCode) => {
 			return new Promise(async (resolve, reject) => {
@@ -355,10 +346,11 @@ app.get('/multipleSpecs', async function (request, response) {
 		return response.status(400).json({ error });
 	}
 });
+
 app.get('/individualSpec', async function (request, response) {
 	try {
-		const specCode = 'CLIMB1';
-		const year = '2020';
+		const specCode = 'PATHB1';
+		const year = '2021';
 
 		var postData = {
 			"query": {
