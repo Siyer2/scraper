@@ -4,6 +4,7 @@ const _ = require('lodash');
 //==== Helper functions ====//
 const { pushProgramToDB, updateRules, pushSpecialisationToDB } = require('./updateDB');
 const { replaceAll, storeErrorInFile } = require('./helperFunctions');
+const { backOff } = require('exponential-backoff');
 
 // Dynamic Queries
 function convertRuleToQueryString(rule) {
@@ -298,7 +299,7 @@ function getEndpoint() {
     return endpointsSortedByUse[0].endpoint;
 }
 
-function getCoursesFromRule(db, rule, programInfo) {
+function getCoursesFromRule(db, rule, programInfo, specialisation) {
     return new Promise(async (resolve, reject) => {
         try {
             var config = {
@@ -315,10 +316,12 @@ function getCoursesFromRule(db, rule, programInfo) {
                     resolve(response.data);
                 })
                 .catch(async function (error) {
-                    console.log("AXIOS ERROR GETTING COURSE FROM RULE", error.response.status);
+                    const isSpec = specialisation ? `SPEC ` : '';
+                    console.log(`AXIOS ERROR ${isSpec}${programInfo.programCode}_${programInfo.year}`);
+                    // console.log("AXIOS ERROR GETTING COURSE FROM RULE", error);
                     // If failed 
-                    await getCoursesFromRule(db, rule, programInfo)
-                    reject(error.response.status);
+                    await backOff(() => getCoursesFromRule(db, rule, programInfo, specialisation));
+                    reject(error);
                 });
 
         } catch (ex) {
@@ -382,7 +385,7 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                     try {
                         // Handle Core Courses and Prescribed Electives
                         if (['Core Course', 'Prescribed Elective', 'One of the following'].includes(rule.vertical_grouping.label)) {
-                            const courses = await getCoursesFromRule(db, rule, programInfo);
+                            const courses = await getCoursesFromRule(db, rule, programInfo, specialisation);
                             rulesToPush[replaceAll(rule.vertical_grouping.label, ' ', '_')].push(courses);
 
                             resolve(courses);
@@ -410,6 +413,11 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                         }
                         // General Education
                         else if (rule.vertical_grouping.label === 'General Education') {
+                            if (rule.relationship.length || rule.dynamic_relationship.length > 1) {
+                                const specName = specialisation ? `_${specialisation.specialisation_code}` : '';
+                                console.log(`WARNING: Weird GE found in ${programInfo.programCode}_${programInfo.year}${specName}`);
+                            }
+
                             const generalEducation = await getGeneralEducation(db, programInfo);
                             const returnObject = {
                                 credit_points: rule.credit_points,
@@ -424,7 +432,7 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                         }
                         // Limit Rule and Free Elective
                         else if (['Limit Rule', 'Free Elective'].includes(rule.vertical_grouping.label)) {
-                            const courses = await getCoursesFromRule(db, rule, programInfo);
+                            const courses = await getCoursesFromRule(db, rule, programInfo, specialisation);
                             rulesToPush[rule.vertical_grouping.label.replace(' ', '_')].push(courses);
 
                             resolve(courses);
@@ -442,8 +450,8 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                         }
                         else {
                             if (!rule.container || !rule.container.length) {
-                                console.log(`Unknown rule: ${rule.vertical_grouping.label}...`);
                                 const specName = specialisation ? `_${specialisation.specialisation_code}.json` : '.json';
+                                console.log(`Unknown rule for ${programInfo.programCode}_${programInfo.year}${specName}: ${rule.vertical_grouping.label}...`);
                                 await storeErrorInFile(`${programInfo.programCode}_${programInfo.year}${specName}`, JSON.stringify(rule));
                             }
 
@@ -603,7 +611,7 @@ module.exports = {
     parseProgram: function (db, programInfo, curriculumStructure, specialisation) {
         return new Promise(async (resolve, reject) => {
             try {
-                console.log(`Parsing ${specialisation ? 'spec ' : ''}${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
+                // console.log(`Parsing ${specialisation ? 'spec ' : ''}${programInfo.programCode}: ${programInfo.title}, ${programInfo.year}...`);
                 if (specialisation) {
                     pushSpecialisationToDB(db, specialisation);
                 }

@@ -132,7 +132,7 @@ app.get('/specialisation', async function (request, response) {
 				}
 			],
 			"from": 0,
-			"size": 2,
+			"size": 300,
 			"track_scores": true,
 			"_source": {
 				"includes": [
@@ -191,7 +191,7 @@ app.get('/specialisation', async function (request, response) {
 
 				await Promise.all(programPromises);
 
-				return response.send(`Finished parsing...`);
+				return response.send(`Successfully pushed ${res.data.contentlets.length} specialisations`);
 			})
 			.catch(function (error) {
 				console.log("AXIOS ERROR PARSING PROGRAM", error.response.status);
