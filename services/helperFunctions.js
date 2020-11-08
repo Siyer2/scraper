@@ -37,7 +37,8 @@ module.exports = {
             studyLevel, 
             minimumUOC, 
             programCode, 
-            ...currentYearData.subclass.value && { specialisation_type: currentYearData.subclass.value }
+            ...currentYearData.subclass.value && { specialisation_type: currentYearData.subclass.value }, 
+            parsed: false
         };
         return programInfo;
     }

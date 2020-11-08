@@ -37,7 +37,8 @@ module.exports = {
                                 "Information_Rule": [],
                                 "Maturity_Rule": [],
                                 "minor": [],
-                                'major': []
+                                'major': [], 
+                                "parsed": false
                             });
                         }
                         resolve();
@@ -101,7 +102,10 @@ module.exports = {
                     ...rulesToPush.One_of_the_following.length && { 'oneOfTheFollowings': oneOfTheFollowings ? oneOfTheFollowings : rulesToPush.One_of_the_following },
                     ...rulesToPush.Recommended.length && { 'recommendeds': recommendeds ? recommendeds : rulesToPush.Recommended },
                     ...rulesToPush.specialisation.length && { 'specialisations': rulesToPush.specialisation },
-                    ...rulesToPush.General_Education && { 'generalEducation': rulesToPush.General_Education }
+                    ...rulesToPush.General_Education && { 'generalEducation': rulesToPush.General_Education }, 
+                    title: programInfo.title, 
+                    faculty: programInfo.faculty, 
+                    minimumUOC: programInfo.minimumUOC
                 }
 
                 if (specialisation) {

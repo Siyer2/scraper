@@ -576,7 +576,7 @@ app.get('/program', async function (request, response) {
 				}
 			],
 			"from": 0,
-			"size": 10,
+			"size": 1,
 			"track_scores": true,
 			"_source": {
 				"includes": [
