@@ -90,7 +90,7 @@ app.get('/specialisation', async function (request, response) {
 												"fields": [
 													"unsw_paos.studyLevelValue"
 												],
-												"query": "*ugrd*"
+												"query": "*rsch*"
 											}
 										}
 									]
@@ -206,10 +206,16 @@ app.get('/specialisation', async function (request, response) {
 app.get('/multipleSpecs', async function (request, response) {
 	try {
 		const specCodes = [
-			'PHARB1', 
-			'PHSLB1'
+			'MODLES', 
+			'MUSCAS', 
+			'PHILAS', 
+			'POLSES', 
+			'SLSPAS', 
+			'SOCAAS', 
+			'SOCWAS'
 		];
 		const year = '2021';
+		const studyLevel = 'postgraduate';
 
 		const specPromises = specCodes.map((specCode) => {
 			return new Promise(async (resolve, reject) => {
@@ -237,7 +243,7 @@ app.get('/multipleSpecs', async function (request, response) {
 														"fields": [
 															"unsw_paos.studyLevelURL"
 														],
-														"query": "undergraduate"
+														"query": studyLevel
 													}
 												}
 											]
@@ -349,8 +355,9 @@ app.get('/multipleSpecs', async function (request, response) {
 
 app.get('/individualSpec', async function (request, response) {
 	try {
-		const specCode = 'PATHB1';
-		const year = '2021';
+		const specCode = 'RUSSAR';
+		const year = '2019';
+		const studyLevel = 'rsch';
 
 		var postData = {
 			"query": {
@@ -375,7 +382,7 @@ app.get('/individualSpec', async function (request, response) {
 											"fields": [
 												"unsw_paos.studyLevelURL"
 											],
-											"query": "undergraduate"
+											"query": studyLevel
 										}
 									}
 								]
