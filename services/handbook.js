@@ -322,11 +322,11 @@ function getCoursesFromRule(db, rule, programInfo, specialisation) {
                 })
                 .catch(async function (error) {
                     const isSpec = specialisation ? `SPEC ` : '';
-                    console.log(`AXIOS ERROR ${isSpec}${programInfo.programCode}_${programInfo.year}`);
+                    console.log(`AXIOS ERROR ${isSpec}${programInfo.programCode}_${programInfo.year}, retrying...`);
                     // console.log("AXIOS ERROR GETTING COURSE FROM RULE", error);
                     // If failed 
-                    // await backOff(() => getCoursesFromRule(db, rule, programInfo, specialisation));
-                    reject();
+                    resolve(await backOff(() => getCoursesFromRule(db, rule, programInfo, specialisation)));
+                    // reject();
                 });
 
         } catch (ex) {
@@ -427,19 +427,30 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                                 if (rule.relationship.length || rule.dynamic_relationship.length > 1) {
                                     const specName = specialisation ? `_${specialisation.specialisation_code}` : '';
                                     console.log(`WARNING: Weird GE found in ${programInfo.programCode}_${programInfo.year}${specName}`);
+
+                                    const generalEducation = await getCoursesFromRule(db, rule, programInfo);
+                                    // const generalEducation = await getGeneralEducation(db, programInfo);
+                                    const returnObject = {
+                                        credit_points: rule.credit_points,
+                                        courses: generalEducation,
+                                        description: rule.description
+                                    }
+    
+                                    rulesToPush[replaceAll(rule.vertical_grouping.label, ' ', '_')].push(returnObject);
+                                }
+                                else {
+                                    const generalEducation = await getGeneralEducation(db, programInfo);
+                                    const returnObject = {
+                                        credit_points: rule.credit_points,
+                                        courses: generalEducation,
+                                        description: rule.description
+                                    }
+    
+                                    rulesToPush[replaceAll(rule.vertical_grouping.label, ' ', '_')].push(returnObject);
                                 }
 
-                                const generalEducation = await getGeneralEducation(db, programInfo);
-                                const returnObject = {
-                                    credit_points: rule.credit_points,
-                                    courses: generalEducation,
-                                    description: rule.description
-                                }
 
-                                rulesToPush[replaceAll(rule.vertical_grouping.label, ' ', '_')].push(returnObject);
-
-                                // await updateItemWithCourses(db, programInfo, specialisation, returnObject, rule.vertical_grouping.label);
-                                resolve(returnObject);
+                                resolve();
                             }
                             // Limit Rule and Free Elective
                             else if (['Limit Rule', 'Free Elective'].includes(rule.vertical_grouping.label)) {

@@ -491,7 +491,27 @@ app.get('/individualSpec', async function (request, response) {
 app.get('/multiplePrograms', async function (request, response) {
 	try {
 		const programCodes = [
-			'3502'
+			'4400',
+			'4437',
+			'4405',
+			'4415',
+			'4480',
+			'4430',
+			'4410',
+			'4482',
+			'4483',
+			'4481',
+			'4475',
+			'4478',
+			'4476',
+			'4462',
+			'4461',
+			'4474',
+			'4471',
+			'4472',
+			'4477',
+			'4473',
+			'4468'
 		];
 		const year = '2019';
 		const studyLevel = 'ugrd';
@@ -659,19 +679,7 @@ app.get('/multiplePrograms', async function (request, response) {
 
 app.get('/program', async function (request, response) {
 	try {
-		// const file = require('./testCS.json');
-		// const pCode = '3061';
-
-		// const year = '2021';
-		// const faculty = '5fa56ceb4f0093004aa6eb4f0310c7af';
-		// const title = 'Food Science (Honours)';
-		// const studyLevel = 'ugrd';
-		// const minimumUOC = '192';
-		// const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode: pCode };
-		// await parseProgram(request.db, programInfo, file);
-
-		// return response.send("done");
-
+		// Get all programs
 		var postData = {
 			"query": {
 				"bool": {
@@ -698,19 +706,19 @@ app.get('/program', async function (request, response) {
 								}
 							},
 							{
-							    "bool": {
-							        "minimum_should_match": "100%",
-							        "should": [
-							            {
-							                "query_string": {
-							                    "fields": [
-							                        "unsw_pcourse.implementationYear"
-							                    ],
-							                    "query": "*2019*"
-							                }
-							            }
-							        ]
-							    }
+								"bool": {
+									"minimum_should_match": "100%",
+									"should": [
+										{
+											"query_string": {
+												"fields": [
+													"unsw_pcourse.implementationYear"
+												],
+												"query": "*2019*"
+											}
+										}
+									]
+								}
 							},
 							{
 								"bool": {
@@ -766,7 +774,6 @@ app.get('/program', async function (request, response) {
 				]
 			}
 		}
-
 		var config = {
 			method: 'post',
 			url: 'https://www.handbook.unsw.edu.au/api/es/search',
@@ -786,19 +793,12 @@ app.get('/program', async function (request, response) {
 			},
 			data: postData
 		};
-		axios(config) // HERE
+		axios(config)
 			.then(async function (res) {
 				let programPromises = res.data.contentlets.map((currentYear) => {
 					return new Promise(async (resolve, reject) => {
 						try {
 							const programInfo = getProgramInfo(JSON.parse(currentYear.data));
-							// const year = JSON.parse(currentYear.data).implementation_year;
-							// const faculty = JSON.parse(currentYear.data).parent_academic_org.cl_id || JSON.parse(currentYear.data).owning_org.cl_id;
-							// const title = JSON.parse(currentYear.data).title;
-							// const studyLevel = JSON.parse(currentYear.data).study_level_single.value;
-							// const minimumUOC = JSON.parse(currentYear.data).credit_points;
-							// const programCode = JSON.parse(currentYear.data).course_code;
-							// const programInfo = { year, faculty, title, studyLevel, minimumUOC, programCode };
 
 							await parseProgram(request.db, programInfo, JSON.parse(currentYear.CurriculumStructure));
 
@@ -812,7 +812,7 @@ app.get('/program', async function (request, response) {
 
 				await Promise.all(programPromises);
 
-				return response.send(`Finished parsing...`);
+				return response.send(`Successfully pushed ${res.data.contentlets.length} programs`);
 			})
 			.catch(function (error) {
 				console.log("AXIOS ERROR PARSING PROGRAM", error.response.status);
@@ -1026,15 +1026,86 @@ app.get('/db', async function (request, response) {
 
 		//#region START DYNAMODB COMMANDS
 
-		// Count items in a table
-		var params = {
-			TableName: 'programs',
-			Select: 'COUNT'
-		};
-		dynamodb.scan(params, function (err, data) {
-			if (err) console.log(err); // an error occurred
-			else console.log(data); // successful response
+		// Updating an item
+		const codes = [
+			'4483',
+			'4481',
+			'4475',
+			'4478',
+			'4476',
+			'4462',
+			'4461',
+			'4474',
+			'4471',
+			'4472',
+			'4477',
+			'4473',
+			'4468'
+		]
+		const codePromises = codes.map((code) => {
+			return new Promise(async (resolve, reject) => {
+				try {
+					const value = [
+						{
+							"courses": [
+								{
+									"code": "ZGEN2801",
+									"credit_points": "6"
+								},
+								{
+									"code": "ZGEN2222",
+									"credit_points": "6"
+								}
+							],
+							"credit_points": '6',
+							"description": "one of the following:"
+						},
+						{
+							"courses": [
+								{
+									"code": "ZGEN2215",
+									"credit_points": "6"
+								},
+								{
+									"code": "ZGEN2240",
+									"credit_points": "6"
+								}
+							],
+							"credit_points": '6',
+							"description": "one of the following:"
+						}
+					];
+
+					var params = {
+						TableName: 'programs',
+						Key: {
+							code: code,
+							implementation_year: "2019"
+						},
+						UpdateExpression: 'SET generalEducation = :value',
+						ExpressionAttributeValues: {
+							':value': value
+						},
+						ReturnValues: 'ALL_NEW'
+					};
+
+					request.db.update(params, function (err, data) {
+						if (err) {
+							console.log(err); 
+							reject(err);
+						}
+						else {
+							console.log(data); 
+							resolve();
+						}
+					});
+				} catch (ex) {
+					console.log("EXCEPTION UPDATING CODES", ex);
+					reject(ex);
+				}
+			});
 		});
+		await Promise.all(codePromises);
 
 		//#endregion
 
