@@ -53,6 +53,8 @@ app.get('/me', async (request, response) => {
 	response.send(`Request received: ${request.method} - ${request.path}, ${ip}`);
 });
 
+// SPECIALISATION COMMANDS
+//#region
 app.get('/specialisation', async function (request, response) {
 	try {
 		// Get all specialisations
@@ -482,7 +484,10 @@ app.get('/individualSpec', async function (request, response) {
 		return response.status(400).json({ error });
 	}
 });
+//#endregion
 
+// PROGRAM COMMANDS
+//#region
 // Get requirements for a single program
 app.get('/program', async function (request, response) {
 	try {
@@ -524,21 +529,21 @@ app.get('/program', async function (request, response) {
 									]
 								}
 							},
-							// {
-							//     "bool": {
-							//         "minimum_should_match": "100%",
-							//         "should": [
-							//             {
-							//                 "query_string": {
-							//                     "fields": [
-							//                         "unsw_pcourse.implementationYear"
-							//                     ],
-							//                     "query": "*2021*"
-							//                 }
-							//             }
-							//         ]
-							//     }
-							// },
+							{
+							    "bool": {
+							        "minimum_should_match": "100%",
+							        "should": [
+							            {
+							                "query_string": {
+							                    "fields": [
+							                        "unsw_pcourse.implementationYear"
+							                    ],
+							                    "query": "*2019*"
+							                }
+							            }
+							        ]
+							    }
+							},
 							{
 								"bool": {
 									"minimum_should_match": "100%",
@@ -576,7 +581,7 @@ app.get('/program', async function (request, response) {
 				}
 			],
 			"from": 0,
-			"size": 1,
+			"size": 500,
 			"track_scores": true,
 			"_source": {
 				"includes": [
@@ -649,7 +654,10 @@ app.get('/program', async function (request, response) {
 		return response.status(400).json({ error });
 	}
 });
+//#endregion
 
+// COURSE COMMANDS
+//#region
 function batchAndUploadCourses(db, courses) {
 	return new Promise(async (resolve, reject) => {
 		try {
@@ -841,6 +849,7 @@ app.get('/courses', async function (request, response) {
 		return response.status(400).json({ error });
 	}
 });
+//#endregion
 
 //==== Calls to initialise the Dynamo DB ====//
 app.get('/db', async function (request, response) {
@@ -851,7 +860,7 @@ app.get('/db', async function (request, response) {
 
 		// Count items in a table
 		var params = {
-			TableName: 'specialisations',
+			TableName: 'programs',
 			Select: 'COUNT'
 		};
 		dynamodb.scan(params, function (err, data) {
