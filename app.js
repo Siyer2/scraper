@@ -488,7 +488,175 @@ app.get('/individualSpec', async function (request, response) {
 
 // PROGRAM COMMANDS
 //#region
-// Get requirements for a single program
+app.get('/multiplePrograms', async function (request, response) {
+	try {
+		const programCodes = [
+			'3502'
+		];
+		const year = '2019';
+		const studyLevel = 'ugrd';
+
+		const programPromises = programCodes.map((programCode) => {
+			return new Promise(async (resolve, reject) => {
+				try {
+					var postData = {
+						"query": {
+							"bool": {
+								"must": [
+									{
+										"query_string": {
+											"query": `unsw_pcourse.code: ${programCode}`
+										}
+									},
+									{
+										"term": {
+											"live": true
+										}
+									},
+									[
+										{
+											"bool": {
+												"minimum_should_match": "100%",
+												"should": [
+													{
+														"query_string": {
+															"fields": [
+																"unsw_pcourse.studyLevelValue"
+															],
+															"query": `*${studyLevel}*`
+														}
+													}
+												]
+											}
+										},
+										{
+											"bool": {
+												"minimum_should_match": "100%",
+												"should": [
+													{
+														"query_string": {
+															"fields": [
+																"unsw_pcourse.implementationYear"
+															],
+															"query": `*${year}*`
+														}
+													}
+												]
+											}
+										},
+										{
+											"bool": {
+												"minimum_should_match": "100%",
+												"should": [
+													{
+														"query_string": {
+															"fields": [
+																"unsw_pcourse.active"
+															],
+															"query": "*1*"
+														}
+													}
+												]
+											}
+										}
+									]
+								],
+								"filter": [
+									{
+										"terms": {
+											"contenttype": [
+												"unsw_pcourse",
+												"unsw_pcourse"
+											]
+										}
+									}
+								]
+							}
+						},
+						"sort": [
+							{
+								"unsw_pcourse.code_dotraw": {
+									"order": "asc"
+								}
+							}
+						],
+						"from": 0,
+						"size": 1000,
+						"track_scores": true,
+						"_source": {
+							"includes": [
+								"*.code",
+								"*.name",
+								"*.award_titles",
+								"*.keywords",
+								"urlmap",
+								"contenttype"
+							],
+							"excludes": [
+								"",
+								null
+							]
+						}
+					}
+
+					var config = {
+						method: 'post',
+						url: 'https://www.handbook.unsw.edu.au/api/es/search',
+						headers: {
+							'authority': 'www.handbook.unsw.edu.au',
+							'sec-ch-ua': '"Chromium";v="86", ""Not\\A;Brand";v="99", "Google Chrome";v="86"',
+							'accept': 'application/json, text/plain, */*',
+							'sec-ch-ua-mobile': '?0',
+							'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36',
+							'content-type': 'application/json;charset=UTF-8',
+							'origin': 'https://www.handbook.unsw.edu.au',
+							'sec-fetch-site': 'same-origin',
+							'sec-fetch-mode': 'cors',
+							'sec-fetch-dest': 'empty',
+							'referer': 'https://www.handbook.unsw.edu.au/undergraduate/programs/2021/3502?year=2021',
+							'accept-language': 'en-US,en;q=0.9',
+						},
+						data: postData
+					};
+					axios(config)
+						.then(async function (res) {
+							let programPromises = res.data.contentlets.map((currentYear) => {
+								return new Promise(async (resolve, reject) => {
+									try {
+										const programInfo = getProgramInfo(JSON.parse(currentYear.data));
+
+										await parseProgram(request.db, programInfo, JSON.parse(currentYear.CurriculumStructure));
+
+										resolve();
+									} catch (ex) {
+										console.log("EXCEPTION PARSING PROGRAM", ex);
+										reject(ex);
+									}
+								});
+							});
+
+							await Promise.all(programPromises);
+
+							resolve();
+						})
+						.catch(function (error) {
+							console.log("AXIOS ERROR PARSING PROGRAM", error);
+							return response.status(400).json({ error });
+						});
+				} catch (ex) {
+					console.log("EXCEPTION WITH SPECCODES", ex);
+					reject(ex);
+				}
+			});
+		});
+
+		await Promise.all(programPromises);
+		return response.send('done');
+	} catch (error) {
+		return response.status(400).json({ error });
+	}
+});
+
 app.get('/program', async function (request, response) {
 	try {
 		// const file = require('./testCS.json');
