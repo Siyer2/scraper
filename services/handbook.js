@@ -402,7 +402,7 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                                 resolve(courses);
                             }
                             // Get Majors/Minors
-                            else if (['DS', 'Undergraduate Major', 'Undergraduate Minor', 'Any Specialisation', 'Honours Specialisation'].includes(rule.vertical_grouping.label)) {
+                            else if (['DS', 'Undergraduate Major', 'Undergraduate Minor', 'Any Specialisation', 'Honours Specialisation', 'Postgraduate Specialisation', 'Research (HDR) Specialisation'].includes(rule.vertical_grouping.label)) {
                                 // const getData = async () => {
                                 //     return Promise.all(rule.relationship.map(specialisation => getSpecAsync(db, {
                                 //         specialisation_code: specialisation.academic_item_code,
@@ -413,7 +413,7 @@ function parseCurriculumStructure(db, rules, programInfo, specialisation) {
                                 // }
 
                                 rule.relationship.map((specialisation) => {
-                                    rulesToPush[specialisation.academic_item_type.value].push(specialisation.academic_item_code);
+                                    rulesToPush[specialisation.academic_item_type.value] ? rulesToPush[specialisation.academic_item_type.value].push(specialisation.academic_item_code) : rulesToPush['specialisation'].push(specialisation.academic_item_code);
                                 });
 
                                 resolve();
